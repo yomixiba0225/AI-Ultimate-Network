@@ -1,7 +1,7 @@
 # CONFIG_ANALYSIS.md
 
 **Phase:** 1 — Repository Analysis
-**Project:** AI-Ultimate-Shadowrocket
+**Project:** AI-Ultimate-Network
 **Baseline analyzed:** `lazy.conf` (336 lines, 24,332 bytes)
 **Date:** 2026-07-08
 **Status:** Analysis only — **no files were modified**

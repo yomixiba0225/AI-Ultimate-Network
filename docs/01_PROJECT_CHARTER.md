@@ -1,4 +1,4 @@
-# AI-Ultimate-Shadowrocket
+# AI-Ultimate-Network
 
 Version: 1.0.0
 
@@ -12,7 +12,7 @@ Author: Claude Code (Execute), ChatGPT (Architecture)
 
 ## Project Vision
 
-AI-Ultimate-Shadowrocket 是一个专门面向 AI 重度用户的 Shadowrocket 配置项目。
+AI-Ultimate-Network 是一个专门面向 AI 重度用户的 Shadowrocket 配置项目。
 
 它不是一个普通的翻墙配置。
 

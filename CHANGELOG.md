@@ -45,4 +45,4 @@ validated configuration project.
   `skip-proxy`, `hijack-dns`, `block-quic=all-proxy`. Original baseline kept at
   `config/lazy.conf` for reference and rollback.
 
-[1.0.0]: https://github.com/yomixiba0225/AI-Ultimate-Shadowrocket/releases/tag/v1.0.0
+[1.0.0]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v1.0.0

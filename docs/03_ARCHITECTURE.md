@@ -1,4 +1,4 @@
-# AI-Ultimate-Shadowrocket
+# AI-Ultimate-Network
 
 Version: 1.0.0
 
@@ -90,7 +90,7 @@ Build
 
 # 4. Directory Layout
 
-AI-Ultimate-Shadowrocket/
+AI-Ultimate-Network/
 
 README.md
 

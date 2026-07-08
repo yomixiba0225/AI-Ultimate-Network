@@ -1,7 +1,7 @@
 # IMPLEMENTATION_PLAN.md
 
 **Phase:** 5 — Implementation Plan (milestones)
-**Project:** AI-Ultimate-Shadowrocket
+**Project:** AI-Ultimate-Network
 **Status:** M1–M6 executed in the v1.0.0 build; M7 (push/release) pending user confirmation.
 
 Each milestone lists **Deliverables · Dependencies · Acceptance Criteria · Rollback**.
@@ -113,7 +113,7 @@ release from the repo alone (Master §Final Objective).
 **Deliverables**
 - `git init` + conventional-commit history.
 - Tag `v1.0.0` + GitHub release notes (from CHANGELOG).
-- Push to `github.com/yomixiba0225/AI-Ultimate-Shadowrocket`.
+- Push to `github.com/yomixiba0225/AI-Ultimate-Network`.
 
 **Dependencies** — M1–M6; **quality gates green**.
 

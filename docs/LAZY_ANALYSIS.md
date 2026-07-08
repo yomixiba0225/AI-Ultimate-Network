@@ -1,7 +1,7 @@
 # LAZY_ANALYSIS.md
 
 **Phase:** 2 — Reverse Engineering of `lazy.conf`
-**Project:** AI-Ultimate-Shadowrocket
+**Project:** AI-Ultimate-Network
 **Scope:** Understand only. **Do not optimize.** No files modified.
 **Baseline:** `lazy.conf`, 336 lines. Origin: `johnshall/Shadowrocket-ADBlock-Rules-Forever`.
 

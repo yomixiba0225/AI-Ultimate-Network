@@ -1,4 +1,4 @@
-# AI-Ultimate-Shadowrocket
+# AI-Ultimate-Network
 
 Version: 1.0.0
 
@@ -12,7 +12,7 @@ Draft
 
 # 1. Product Overview
 
-AI-Ultimate-Shadowrocket 是一套专门针对 AI Developer 的网络策略配置。
+AI-Ultimate-Network 是一套专门针对 AI Developer 的网络策略配置。
 
 项目目标不是构建新的代理工具。
 

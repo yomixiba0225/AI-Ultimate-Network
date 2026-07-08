@@ -1,4 +1,4 @@
-<!-- Thanks for contributing to AI-Ultimate-Shadowrocket -->
+<!-- Thanks for contributing to AI-Ultimate-Network -->
 
 ## What & why
 

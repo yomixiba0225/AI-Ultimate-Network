@@ -1,7 +1,7 @@
 # DESIGN.md
 
 **Phase:** 4 — Design
-**Project:** AI-Ultimate-Shadowrocket
+**Project:** AI-Ultimate-Network
 **Status:** Design specification. **No code written, no config modified.**
 **Inputs:** CONFIG_ANALYSIS.md, LAZY_ANALYSIS.md, GAP_ANALYSIS.md, Charter/PRD/Architecture.
 

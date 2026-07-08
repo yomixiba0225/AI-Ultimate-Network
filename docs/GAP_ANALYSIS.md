@@ -1,7 +1,7 @@
 # GAP_ANALYSIS.md
 
 **Phase:** 3 — Architecture Validation
-**Project:** AI-Ultimate-Shadowrocket
+**Project:** AI-Ultimate-Network
 **Compares:** Current baseline (`lazy.conf`, per CONFIG_ANALYSIS + LAZY_ANALYSIS)
 **Against:** `01_PROJECT_CHARTER.md`, `02_PRD.md.md`, `03_ARCHITECTURE.md`
 **Status:** Analysis only. No files modified.
