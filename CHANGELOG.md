@@ -4,6 +4,18 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-07-08
+
+### Added
+- **Clash Verge Global Merge overlay**: `config/AI-Ultimate.clash-merge.yaml`. Paste once into
+  Clash Verge's *全局扩展覆写配置 (Global Merge)* and the AI groups + rules apply on top of
+  **every** subscription profile automatically — ideal for users with **multiple subscriptions**
+  on macOS and Windows. Groups use `include-all: true` (pull nodes from the active profile), so
+  there are no node URLs and no per-subscription copy-paste. Prepends rules only; coexists with a
+  Global Script (e.g. Adobe blocking) and leaves each profile's own final policy intact.
+- `build.py --target clash-merge`; validation + tests for the overlay (no MATCH/FINAL allowed).
+- `docs/USAGE.md` §2A documents the multi-subscription Global Merge workflow.
+
 ## [0.2.0] - 2026-07-08
 
 Multi-client release. The same AI-first strategy now generates configs for three clients from
@@ -73,5 +85,6 @@ validated configuration project.
   `skip-proxy`, `hijack-dns`, `block-quic=all-proxy`. Original baseline kept at
   `config/lazy.conf` for reference and rollback.
 
+[0.2.1]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.1
 [0.2.0]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.0
 [0.1.0]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.1.0

@@ -41,6 +41,35 @@ New nodes auto-join the matching group — no edits. Update: swipe the config �
 
 ## 2. Clash Verge (Windows / macOS / Linux)
 
+Two ways. **If you have multiple subscriptions, use 2A (Global Merge)** — it's the whole point.
+
+### 2A. Multiple subscriptions — Global Merge overlay ✅ recommended
+
+Use `config/AI-Ultimate.clash-merge.yaml`. This overlays our AI groups + rules on top of
+**every** subscription profile at once, so you never edit per-subscription files. Identical
+steps on **macOS and Windows** (Clash Verge is the same app on both).
+
+1. Keep your airport subscriptions as normal **Remote** profiles in Clash Verge (they provide
+   the nodes). You can have as many as you like.
+2. Open **Settings → Merge** (Clash Verge Rev: 设置 → **全局扩展覆写配置 / Global Merge**;
+   older builds: per-profile ⋯ → *Edit* → *Merge*). This is the box you found empty.
+3. Paste the **entire contents** of `config/AI-Ultimate.clash-merge.yaml` there. Save.
+4. That's it. Switch between any subscription profile — the `Claude / ChatGPT / GitHub / Google /
+   Proxy / Apple` groups and the AI rules apply automatically, because the groups use
+   `include-all: true` (they pull nodes from whichever profile is active). **No node URLs, no
+   per-sub copy-paste.**
+5. In the **Proxies** page, pick a node once per AI group (Claude→TW, ChatGPT→US, …).
+
+Notes:
+- The overlay **prepends** its rules, so AI/Apple/China routing wins; everything else falls
+  through to each subscription's own rules + final policy (untouched).
+- It only adds groups/rules — it does **not** touch your **Global Script** (e.g. your Adobe
+  block). Merge (YAML) and Script (JS) are separate stages and run together.
+- Multiple region nodes across different airports all match by name regex, so e.g. a Taiwan node
+  from *any* subscription shows up in the Claude group.
+
+### 2B. Single subscription — standalone profile
+
 Clash Verge (Rev) runs the **Clash Meta** core, so it uses `AI-Ultimate.clash.yaml`.
 
 1. **Set your airport subscription URL.** Open `config/AI-Ultimate.clash.yaml` and replace the

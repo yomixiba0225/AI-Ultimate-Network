@@ -130,6 +130,28 @@ class TestSurge(unittest.TestCase):
         self.assertTrue(any(r.endswith(",ChatGPT") for r in self.rules))
 
 
+class TestClashMergeOverlay(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.text = (ROOT / "config" / "AI-Ultimate.clash-merge.yaml").read_text(encoding="utf-8")
+
+    def test_is_prepend_overlay(self):
+        self.assertIn("prepend-proxy-groups:", self.text)
+        self.assertIn("prepend-rules:", self.text)
+
+    def test_no_catch_all(self):
+        # overlay must NOT own the final rule (the base subscription profile does)
+        self.assertNotIn("MATCH,", self.text)
+        self.assertNotIn("FINAL,", self.text)
+
+    def test_groups_use_include_all(self):
+        # works across ALL subscriptions without per-sub URLs
+        for g in ("Claude", "ChatGPT", "GitHub", "Google"):
+            block = re.search(rf"name: {g}\b[^}}]*", self.text).group(0)
+            self.assertIn("include-all: true", block)
+            self.assertIn("filter:", block)
+
+
 class TestCrossClientConsistency(unittest.TestCase):
     """The AI region strategy must be identical across all three clients."""
 

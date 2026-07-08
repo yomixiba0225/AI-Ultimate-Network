@@ -30,6 +30,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CONF = {
     "shadowrocket": ROOT / "config" / "AI-Ultimate.conf",
     "clash": ROOT / "config" / "AI-Ultimate.clash.yaml",
+    "clash-merge": ROOT / "config" / "AI-Ultimate.clash-merge.yaml",
     "surge": ROOT / "config" / "AI-Ultimate.surge.conf",
 }
 BUILTINS = {"DIRECT", "PROXY", "REJECT", "REJECT-DROP", "REJECT-NO-DROP", "REJECT-200",
@@ -118,6 +119,38 @@ def validate_clash(text: str) -> None:
     _check_rules(scope, [r.strip() for r in rules], valid, final_kw="MATCH")
 
 
+def validate_clash_merge(text: str) -> None:
+    """Overlay fragment: prepend-proxy-groups + prepend-rules, no MATCH tail."""
+    scope = "clash-merge"
+    data = _load_yaml(text)
+    if data is None:
+        # lightweight: just confirm the two prepend keys exist
+        if "prepend-proxy-groups:" not in text or "prepend-rules:" not in text:
+            fail(scope, "missing prepend-proxy-groups / prepend-rules")
+        return
+    pg = data.get("prepend-proxy-groups")
+    rules = data.get("prepend-rules")
+    if not pg:
+        fail(scope, "missing prepend-proxy-groups")
+        return
+    if not rules:
+        fail(scope, "missing prepend-rules")
+        return
+    groups = {g["name"]: g["type"] for g in pg}
+    _check_groups(scope, groups)
+    for g in pg:
+        if g["name"] in AI and "filter" not in g:
+            fail(scope, f"AI group {g['name']!r} has no regex filter")
+    valid = set(groups) | BUILTINS
+    for r in rules:
+        pol = policy_of(r)
+        if pol not in valid:
+            fail(scope, f"prepend-rule targets undefined policy {pol!r}: {r!r}")
+    # an overlay must NOT contain a catch-all (that belongs to the base profile)
+    if any(r.split(",", 1)[0] in ("MATCH", "FINAL") for r in rules):
+        fail(scope, "overlay must not contain MATCH/FINAL (base profile owns the tail)")
+
+
 def _load_yaml(text: str):
     try:
         import yaml  # optional; present in CI
@@ -171,8 +204,8 @@ def main() -> int:
         print(res.stdout.strip())
         fail("build", "configs are stale — run: python3 scripts/build.py")
 
-    validators = {"shadowrocket": validate_shadowrocket,
-                  "clash": validate_clash, "surge": validate_surge}
+    validators = {"shadowrocket": validate_shadowrocket, "clash": validate_clash,
+                  "clash-merge": validate_clash_merge, "surge": validate_surge}
     for name, path in CONF.items():
         if not path.exists():
             fail(name, f"missing {path}")
@@ -184,7 +217,7 @@ def main() -> int:
             print(f"[validate] FAIL {e}")
         print(f"[validate] RESULT: FAILED ({len(errors)} errors)")
         return 1
-    print("[validate] all targets (shadowrocket, clash, surge) PASSED")
+    print(f"[validate] all targets PASSED: {', '.join(CONF)}")
     return 0
 
 

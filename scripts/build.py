@@ -27,6 +27,7 @@ TEMPLATE = ROOT / "config" / "AI-Ultimate.template.conf"
 OUT = {
     "shadowrocket": ROOT / "config" / "AI-Ultimate.conf",
     "clash": ROOT / "config" / "AI-Ultimate.clash.yaml",
+    "clash-merge": ROOT / "config" / "AI-Ultimate.clash-merge.yaml",
     "surge": ROOT / "config" / "AI-Ultimate.surge.conf",
 }
 INCLUDE = "#!INCLUDE"
@@ -160,9 +161,55 @@ def build_surge() -> str:
     return "\n".join(L)
 
 
+# ---------------------------------------------------- Clash Verge Global Merge -----
+def build_clash_merge() -> str:
+    """
+    Overlay for Clash Verge's '全局扩展覆写配置 (Global Merge)'. Applies our AI strategy
+    on TOP of ANY active subscription profile — works across multiple subscriptions on
+    Mac and Windows with zero per-sub editing. Groups use include-all (pull nodes from
+    whatever profile is active). Only AI/Apple/China are overridden; the airport's own
+    rules + final policy still handle everything else. Coexists with a Global Script.
+    """
+    wanted = ["Claude", "ChatGPT", "GitHub", "Google", "Proxy", "Apple"]
+    L: list[str] = []
+    L.append("# ============================================================================")
+    L.append("#  AI-Ultimate-Network — Clash Verge GLOBAL MERGE overlay. GENERATED — DO NOT EDIT.")
+    L.append("#  Rebuild: python3 scripts/build.py --target clash-merge")
+    L.append("#")
+    L.append("#  Paste ALL of this into Clash Verge:  设置 → (选中订阅) 编辑 → 全局扩展覆写配置")
+    L.append("#  (Settings → Merge / Global Extended Config). It overlays these groups + AI")
+    L.append("#  rules onto EVERY subscription automatically. No node URLs needed.")
+    L.append("# ============================================================================")
+    L.append("prepend-proxy-groups:")
+    for name in wanted:
+        g = next(x for x in S.GROUPS if x["name"] == name)
+        flt = S.group_filter(g)
+        if flt is None:  # Apple -> member list
+            members = ", ".join(g["members"])
+            L.append(f"  - {{name: {name}, type: select, proxies: [{members}]}}")
+        else:
+            L.append(f"  - {{name: {name}, type: select, include-all: true, filter: '{flt}'}}")
+    L.append("prepend-rules:")
+    merge_tiers = [
+        ("anthropic.list", "Claude"), ("openai.list", "ChatGPT"),
+        ("github.list", "GitHub"), ("google.list", "Google"),
+        ("apple.list", "Apple"), ("ai-extra.list", "Proxy"), ("china.list", "DIRECT"),
+    ]
+    for list_name, policy in merge_tiers:
+        for r in S.read_list(list_name):
+            L.append(f"  - {r},{policy}")
+    L.append("  - GEOSITE,github,GitHub")
+    L.append("  - GEOSITE,apple,DIRECT")
+    L.append("  - GEOSITE,geolocation-cn,DIRECT")
+    L.append("  - GEOIP,CN,DIRECT,no-resolve")
+    L.append("")
+    return "\n".join(L)
+
+
 BUILDERS = {
     "shadowrocket": build_shadowrocket,
     "clash": build_clash,
+    "clash-merge": build_clash_merge,
     "surge": build_surge,
 }
 
