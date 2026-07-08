@@ -1,12 +1,12 @@
 <div align="center">
 
-# AI-Ultimate-Shadowrocket
+# AI-Ultimate-Network
 
 **An AI-first Shadowrocket configuration for developers who live in Claude, ChatGPT, GitHub & Gemini.**
 
 Stable region-pinned routing for AI services · zero-config node management via regex · built, validated, and versioned like real software.
 
-[![validate](https://github.com/yomixiba0225/AI-Ultimate-Shadowrocket/actions/workflows/validate.yml/badge.svg)](https://github.com/yomixiba0225/AI-Ultimate-Shadowrocket/actions/workflows/validate.yml)
+[![validate](https://github.com/yomixiba0225/AI-Ultimate-Network/actions/workflows/validate.yml/badge.svg)](https://github.com/yomixiba0225/AI-Ultimate-Network/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Shadowrocket](https://img.shields.io/badge/Shadowrocket-compatible-blue)
 ![version](https://img.shields.io/badge/version-1.0.0-brightgreen)
@@ -45,7 +45,7 @@ means it *auto-joins the right group* — **zero config edits**.
    Make sure node names contain a region token — `TW / US / SG / JP` or `台湾 / 美国 / 新加坡 / 日本`.
 2. **Import the config.** In Shadowrocket → Config → add from URL:
    ```
-   https://raw.githubusercontent.com/yomixiba0225/AI-Ultimate-Shadowrocket/main/config/AI-Ultimate.conf
+   https://raw.githubusercontent.com/yomixiba0225/AI-Ultimate-Network/main/config/AI-Ultimate.conf
    ```
    (or download [`config/AI-Ultimate.conf`](config/AI-Ultimate.conf) and import the file).
 3. **Pick your nodes once.** Open the `Claude`, `ChatGPT`, `GitHub`, `Google` groups and select a
@@ -114,7 +114,7 @@ CI runs all three on every push/PR ([`.github/workflows/validate.yml`](.github/w
 ## Project structure
 
 ```
-AI-Ultimate-Shadowrocket/
+AI-Ultimate-Network/
 ├── config/
 │   ├── AI-Ultimate.conf            # ← GENERATED, import this
 │   ├── AI-Ultimate.template.conf   # ← edit this
