@@ -4,6 +4,16 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2026-07-08
+
+### Added
+- **Clash Verge Global Script** delivery: `config/AI-Ultimate.clash-script.js` (`build.py
+  --target clash-script`). Builds the AI groups from the live node list inside the enhance stage,
+  so it is immune to the failure mode where an existing Global Script runs after the Merge and
+  drops the merged proxy-groups. Recommended for multi-subscription users who already run a
+  Global Script (e.g. an Adobe block). Empty region → falls back to `Proxy` (never DIRECT);
+  `\bUS\b` guard verified to not match `AUS`. `docs/USAGE.md` §2A-Script documents it.
+
 ## [0.2.2] - 2026-07-08
 
 ### Fixed
@@ -96,6 +106,7 @@ validated configuration project.
   `skip-proxy`, `hijack-dns`, `block-quic=all-proxy`. Original baseline kept at
   `config/lazy.conf` for reference and rollback.
 
+[0.2.3]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.3
 [0.2.2]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.2
 [0.2.1]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.1
 [0.2.0]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.0

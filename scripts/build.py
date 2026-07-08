@@ -17,6 +17,7 @@ Usage:
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -28,6 +29,7 @@ OUT = {
     "shadowrocket": ROOT / "config" / "AI-Ultimate.conf",
     "clash": ROOT / "config" / "AI-Ultimate.clash.yaml",
     "clash-merge": ROOT / "config" / "AI-Ultimate.clash-merge.yaml",
+    "clash-script": ROOT / "config" / "AI-Ultimate.clash-script.js",
     "surge": ROOT / "config" / "AI-Ultimate.surge.conf",
 }
 INCLUDE = "#!INCLUDE"
@@ -211,10 +213,78 @@ def build_clash_merge() -> str:
     return "\n".join(L)
 
 
+# --------------------------------------------------- Clash Verge Global Script -----
+def build_clash_script() -> str:
+    """
+    Clash Verge '全局扩展脚本 (Global Script)' — the most reliable injection point.
+    Runs in the enhance stage and builds each group's node list from the ACTUAL proxy
+    names (no include-all, no empty-group crash, not clobbered by merge ordering).
+    If you already have a Global Script, paste the BEGIN..END block inside your own
+    main(config) right before `return config`.
+    """
+    tiers = [
+        ("anthropic.list", "Claude"), ("openai.list", "ChatGPT"),
+        ("github.list", "GitHub"), ("google.list", "Google"),
+        ("apple.list", "Apple"), ("ai-extra.list", "Proxy"), ("china.list", "DIRECT"),
+    ]
+    rules: list[str] = []
+    for list_name, policy in tiers:
+        for r in S.read_list(list_name):
+            rules.append(f"{r},{policy}")
+    rules += ["GEOSITE,github,GitHub", "GEOSITE,apple,DIRECT",
+              "GEOSITE,geolocation-cn,DIRECT", "GEOIP,CN,DIRECT,no-resolve"]
+    rules_js = ",\n    ".join(json.dumps(r) for r in rules)
+    return f'''// ============================================================================
+// AI-Ultimate-Network — Clash Verge GLOBAL SCRIPT. GENERATED — DO NOT EDIT.
+// Rebuild: python3 scripts/build.py --target clash-script
+//
+// Put this in Clash Verge:  设置 → 全局扩展脚本 (Global Script).
+// If you ALREADY have a Global Script (e.g. Adobe block), keep ONE main() and paste
+// only the code between "BEGIN" and "END" inside it, just before `return config`.
+// Works across EVERY subscription automatically — builds groups from the live nodes.
+// ============================================================================
+function main(config) {{
+  // ===== AI-Ultimate-Network BEGIN =====
+  var names = (config.proxies || []).map(function (p) {{ return p.name; }});
+  var pick = function (re) {{ return names.filter(function (n) {{ return re.test(n); }}); }};
+  var R = {{
+    TW: /(\\bTW\\b|Taiwan|台湾|台灣)/i,
+    US: /(\\bUS\\b|USA|美国|美國)/i,
+    SG: /(\\bSG\\b|Singapore|新加坡|狮城)/i,
+    JP: /(\\bJP\\b|Japan|日本)/i
+  }};
+  var region = function () {{
+    var a = [];
+    for (var i = 0; i < arguments.length; i++) a = a.concat(pick(R[arguments[i]]));
+    return a.filter(function (v, idx) {{ return a.indexOf(v) === idx; }});
+  }};
+  var sel = function (name, list) {{
+    return {{ name: name, type: "select", proxies: (list.length ? list : ["Proxy"]) }};
+  }};
+  var aiGroups = [
+    sel("Claude", region("TW")),
+    sel("ChatGPT", region("US", "SG")),
+    sel("GitHub", region("US", "JP")),
+    sel("Google", region("JP", "SG")),
+    {{ name: "Proxy", type: "select", proxies: (names.length ? names : ["DIRECT"]) }},
+    {{ name: "Apple", type: "select", proxies: ["DIRECT", "Proxy"] }}
+  ];
+  config["proxy-groups"] = aiGroups.concat(config["proxy-groups"] || []);
+  var aiRules = [
+    {rules_js}
+  ];
+  config["rules"] = aiRules.concat(config["rules"] || []);
+  // ===== AI-Ultimate-Network END =====
+  return config;
+}}
+'''
+
+
 BUILDERS = {
     "shadowrocket": build_shadowrocket,
     "clash": build_clash,
     "clash-merge": build_clash_merge,
+    "clash-script": build_clash_script,
     "surge": build_surge,
 }
 

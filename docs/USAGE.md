@@ -43,7 +43,25 @@ New nodes auto-join the matching group — no edits. Update: swipe the config �
 
 Two ways. **If you have multiple subscriptions, use 2A (Global Merge)** — it's the whole point.
 
-### 2A. Multiple subscriptions — Global Merge overlay ✅ recommended
+### 2A-Script. Multiple subscriptions + you already use a Global Script ✅ most reliable
+
+If a **Global Script** (脚本) is present (e.g. an Adobe block), it runs **after** the Merge and
+can drop groups the Merge added — so the Merge overlay may silently not appear. Do everything in
+the Script instead. Use `config/AI-Ultimate.clash-script.js`.
+
+1. Open **设置 → 全局扩展脚本 (Global Script)**.
+2. If it's empty: paste the whole file. If you already have a script: keep **one** `main(config)`
+   and paste only the code between `// ===== AI-Ultimate-Network BEGIN =====` and `END` inside
+   it, **right before `return config`** (after your Adobe lines).
+3. Clear the **全局扩展覆写配置 (Global Merge)** to avoid confusion (the script does it all).
+4. **订阅** page → click your profile card to regenerate. **代理** page now shows
+   `Claude / ChatGPT / GitHub / Google / Proxy / Apple` + your original group.
+
+Why it's reliable: the script builds each group's node list from your **live** nodes (no
+`include-all`, no empty-group crash, not clobbered by merge ordering). A region with no node
+falls back to `Proxy` (never DIRECT). Works across all subscriptions automatically.
+
+### 2A. Multiple subscriptions — Global Merge overlay (if you have NO Global Script)
 
 Use `config/AI-Ultimate.clash-merge.yaml`. This overlays our AI groups + rules on top of
 **every** subscription profile at once, so you never edit per-subscription files. Identical
