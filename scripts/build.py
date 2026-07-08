@@ -1,96 +1,203 @@
 #!/usr/bin/env python3
 """
-build.py — Assemble config/AI-Ultimate.conf from the template + rules/*.list.
+build.py — Generate every client config from one source of truth.
 
-Configuration-as-code (ARCH 5): the shipped .conf is GENERATED, never hand-edited.
-Every `#!INCLUDE <file> <group>` line in the template is replaced by the rules in
-rules/<file>, each with `,<group>` appended as its policy.
+Targets:
+  shadowrocket -> config/AI-Ultimate.conf         (template + rules/*.list)
+  clash        -> config/AI-Ultimate.clash.yaml   (strategy.py + rules/*.list, GEOSITE/GEOIP)
+  surge        -> config/AI-Ultimate.surge.conf   (strategy.py + rules/*.list, GEOIP)
+
+The AI-separation / region-pinning / regex-node core is identical across clients
+because all three read the same rules/*.list and scripts/strategy.py.
 
 Usage:
-    python3 scripts/build.py            # build
-    python3 scripts/build.py --check    # build to memory, fail if on-disk differs
+    python3 scripts/build.py                 # build all targets
+    python3 scripts/build.py --target clash  # one target
+    python3 scripts/build.py --check         # build in memory, fail if any on-disk differs
 """
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
+import strategy as S
+
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE = ROOT / "config" / "AI-Ultimate.template.conf"
-OUTPUT = ROOT / "config" / "AI-Ultimate.conf"
-RULES_DIR = ROOT / "rules"
-
+OUT = {
+    "shadowrocket": ROOT / "config" / "AI-Ultimate.conf",
+    "clash": ROOT / "config" / "AI-Ultimate.clash.yaml",
+    "surge": ROOT / "config" / "AI-Ultimate.surge.conf",
+}
 INCLUDE = "#!INCLUDE"
-HEADER = (
-    "# ============================================================================\n"
-    "#  AI-Ultimate.conf — GENERATED FILE. DO NOT EDIT BY HAND.\n"
-    "#  Source: config/AI-Ultimate.template.conf + rules/*.list\n"
-    "#  Rebuild: python3 scripts/build.py\n"
-    "# ============================================================================\n"
-)
+AIRPORT_PLACEHOLDER = "YOUR_AIRPORT_SUBSCRIPTION_URL"
 
 
-def load_rule_lines(list_name: str) -> list[str]:
-    """Return TYPE,value lines from a rules/*.list file (comments/blanks stripped)."""
-    path = RULES_DIR / list_name
-    if not path.exists():
-        raise SystemExit(f"[build] ERROR: missing rules file: {path}")
-    out: list[str] = []
-    for raw in path.read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        out.append(line)
-    return out
-
-
-def expand(template_text: str) -> str:
-    result: list[str] = [HEADER]
-    for line in template_text.splitlines():
-        stripped = line.strip()
-        if stripped.startswith(INCLUDE):
-            parts = stripped.split()
+# ---------------------------------------------------------------- Shadowrocket -----
+def build_shadowrocket() -> str:
+    header = (
+        "# ============================================================================\n"
+        "#  AI-Ultimate.conf — GENERATED FILE. DO NOT EDIT BY HAND.\n"
+        "#  Source: config/AI-Ultimate.template.conf + rules/*.list\n"
+        "#  Rebuild: python3 scripts/build.py\n"
+        "# ============================================================================\n"
+    )
+    out = [header]
+    for line in TEMPLATE.read_text(encoding="utf-8").splitlines():
+        s = line.strip()
+        if s.startswith(INCLUDE):
+            parts = s.split()
             if len(parts) != 3:
-                raise SystemExit(f"[build] ERROR: bad INCLUDE directive: {line!r}")
+                raise SystemExit(f"[build] bad INCLUDE: {line!r}")
             _, list_name, group = parts
-            rules = load_rule_lines(list_name)
-            result.append(f"# --- expanded from rules/{list_name} -> {group} "
-                          f"({len(rules)} rules) ---")
-            for rule in rules:
-                result.append(f"{rule},{group}")
+            rules = S.read_list(list_name)
+            out.append(f"# --- expanded from rules/{list_name} -> {group} ({len(rules)} rules) ---")
+            out += [f"{r},{group}" for r in rules]
         else:
-            result.append(line)
-    text = "\n".join(result)
-    if not text.endswith("\n"):
-        text += "\n"
-    return text
+            out.append(line)
+    text = "\n".join(out)
+    return text if text.endswith("\n") else text + "\n"
+
+
+# ------------------------------------------------------------------------ Clash -----
+def build_clash() -> str:
+    L: list[str] = []
+    L.append("# ============================================================================")
+    L.append("#  AI-Ultimate-Network — Clash Meta / Clash Verge config. GENERATED — DO NOT EDIT.")
+    L.append("#  Rebuild: python3 scripts/build.py --target clash")
+    L.append("#")
+    L.append(f"#  SETUP: replace {AIRPORT_PLACEHOLDER} below with your airport subscription")
+    L.append("#  URL. Groups auto-select nodes from it by region regex (see docs/USAGE.md).")
+    L.append("# ============================================================================")
+    L.append("mixed-port: 7890")
+    L.append("mode: rule")
+    L.append("log-level: info")
+    L.append("ipv6: false")
+    L.append("")
+    L.append("proxy-providers:")
+    L.append("  airport:")
+    L.append("    type: http")
+    L.append(f"    url: \"{AIRPORT_PLACEHOLDER}\"")
+    L.append("    interval: 3600")
+    L.append("    path: ./providers/airport.yaml")
+    L.append("    health-check:")
+    L.append("      enable: true")
+    L.append(f"      url: {S.HEALTH_URL}")
+    L.append("      interval: 300")
+    L.append("")
+    L.append("proxy-groups:")
+    for g in S.GROUPS:
+        flt = S.group_filter(g)
+        if flt is None:  # member-list group (Apple / Final)
+            members = ", ".join(g["members"])
+            L.append(f"  - {{name: {g['name']}, type: select, proxies: [{members}]}}")
+        elif g["kind"] == "url-test":
+            L.append(f"  - name: {g['name']}")
+            L.append(f"    type: url-test")
+            L.append(f"    use: [airport]")
+            L.append(f"    filter: '{flt}'")
+            L.append(f"    url: {S.HEALTH_URL}")
+            L.append(f"    interval: 300")
+            L.append(f"    tolerance: 50")
+        else:  # select with region filter
+            L.append(f"  - name: {g['name']}")
+            L.append(f"    type: select")
+            L.append(f"    use: [airport]")
+            L.append(f"    filter: '{flt}'")
+    L.append("")
+    L.append("rules:")
+    # 1. local provider inlines (precise AI routing), canonical order
+    for list_name, policy in S.LOCAL_TIERS:
+        for r in S.read_list(list_name):
+            L.append(f"  - {r},{policy}")
+    # 2. native GEOSITE/GEOIP tail (bundled with the core — no external URLs)
+    L.append("  - GEOSITE,github,GitHub")
+    L.append("  - GEOSITE,apple,DIRECT")
+    L.append("  - GEOSITE,geolocation-cn,DIRECT")
+    L.append("  - GEOIP,CN,DIRECT,no-resolve")
+    L.append("  - MATCH,Final")
+    L.append("")
+    return "\n".join(L)
+
+
+# ------------------------------------------------------------------------ Surge -----
+def build_surge() -> str:
+    L: list[str] = []
+    L.append("# ============================================================================")
+    L.append("#  AI-Ultimate-Network — Surge config. GENERATED — DO NOT EDIT BY HAND.")
+    L.append("#  Rebuild: python3 scripts/build.py --target surge")
+    L.append("#  SETUP: add your airport nodes via Surge's Subscription/Proxy, then the")
+    L.append("#  groups below auto-select them by region regex (see docs/USAGE.md).")
+    L.append("# ============================================================================")
+    L.append("[General]")
+    L.append("loglevel = notify")
+    L.append("ipv6 = false")
+    L.append("dns-server = 223.5.5.5, 119.29.29.29, system")
+    L.append("skip-proxy = 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12, localhost, *.local")
+    L.append("")
+    L.append("[Proxy]")
+    L.append("# Add your nodes here or via Surge Subscription. Groups use include-all-proxies.")
+    L.append("")
+    L.append("[Proxy Group]")
+    for g in S.GROUPS:
+        flt = S.group_filter(g)
+        if flt is None:
+            members = ", ".join(g["members"])
+            L.append(f"{g['name']} = select, {members}")
+        elif g["kind"] == "url-test":
+            L.append(f"{g['name']} = url-test, include-all-proxies=true, "
+                     f"policy-regex-filter={flt}, url={S.HEALTH_URL}, interval=300, tolerance=50")
+        else:
+            L.append(f"{g['name']} = select, include-all-proxies=true, policy-regex-filter={flt}")
+    L.append("")
+    L.append("[Rule]")
+    for list_name, policy in S.LOCAL_TIERS:
+        for r in S.read_list(list_name):
+            L.append(f"{r},{policy}")
+    L.append("GEOIP,CN,DIRECT")
+    L.append("FINAL,Final")
+    L.append("")
+    return "\n".join(L)
+
+
+BUILDERS = {
+    "shadowrocket": build_shadowrocket,
+    "clash": build_clash,
+    "surge": build_surge,
+}
 
 
 def main() -> int:
-    if not TEMPLATE.exists():
-        raise SystemExit(f"[build] ERROR: missing template: {TEMPLATE}")
-    built = expand(TEMPLATE.read_text(encoding="utf-8"))
+    args = sys.argv[1:]
+    check = "--check" in args
+    target = None
+    if "--target" in args:
+        i = args.index("--target")
+        target = args[i + 1] if i + 1 < len(args) else None
+        if target not in BUILDERS:
+            raise SystemExit(f"[build] unknown target {target!r}; choose from {list(BUILDERS)}")
+    targets = [target] if target else list(BUILDERS)
 
-    if "--check" in sys.argv:
-        current = OUTPUT.read_text(encoding="utf-8") if OUTPUT.exists() else ""
-        if current != built:
-            print("[build] --check FAILED: config/AI-Ultimate.conf is stale. "
-                  "Run: python3 scripts/build.py")
-            return 1
-        print("[build] --check OK: built config matches on-disk.")
-        return 0
-
-    OUTPUT.write_text(built, encoding="utf-8")
-    rule_count = sum(1 for ln in built.splitlines()
-                     if ln and not ln.startswith("#") and "," in ln
-                     and ln.split(",", 1)[0] in {
-                         "DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD", "DOMAIN-SET",
-                         "DOMAIN-WILDCARD", "RULE-SET", "IP-CIDR", "IP-CIDR6",
-                         "GEOIP", "IP-ASN", "USER-AGENT", "URL-REGEX", "FINAL",
-                         "DST-PORT", "AND", "OR", "NOT",
-                     })
-    print(f"[build] wrote {OUTPUT.relative_to(ROOT)} ({rule_count} rules).")
-    return 0
+    rc = 0
+    for t in targets:
+        built = BUILDERS[t]()
+        path = OUT[t]
+        if check:
+            current = path.read_text(encoding="utf-8") if path.exists() else ""
+            if current != built:
+                print(f"[build] --check FAILED: {path.relative_to(ROOT)} is stale. "
+                      f"Run: python3 scripts/build.py")
+                rc = 1
+            else:
+                print(f"[build] --check OK: {path.relative_to(ROOT)}")
+        else:
+            path.write_text(built, encoding="utf-8")
+            n = sum(1 for ln in built.splitlines()
+                    if "," in ln and ln.lstrip("# -").split(",", 1)[0] in {
+                        "DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD", "RULE-SET", "GEOIP",
+                        "GEOSITE", "IP-CIDR", "FINAL", "MATCH"})
+            print(f"[build] wrote {path.relative_to(ROOT)} (~{n} rules).")
+    return rc
 
 
 if __name__ == "__main__":

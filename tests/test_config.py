@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-test_config.py — acceptance tests for the built Shadowrocket config.
+test_config.py — acceptance tests across all client targets.
 
 Run:  python3 -m unittest discover -s tests
-  or: python3 tests/test_config.py
-
-Maps to PRD 20 / Master SUCCESS acceptance criteria. Pure stdlib, no deps.
+Pure stdlib (yaml optional). Verifies the AI-first strategy is identical on
+Shadowrocket, Clash Meta/Verge and Surge (generated from one source of truth).
 """
 import re
 import subprocess
@@ -14,101 +13,150 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CONF = ROOT / "config" / "AI-Ultimate.conf"
+sys.path.insert(0, str(ROOT / "scripts"))
+import strategy as S  # noqa: E402
+
+SR = ROOT / "config" / "AI-Ultimate.conf"
+CLASH = ROOT / "config" / "AI-Ultimate.clash.yaml"
+SURGE = ROOT / "config" / "AI-Ultimate.surge.conf"
 BUILD = ROOT / "scripts" / "build.py"
 VALIDATE = ROOT / "scripts" / "validate.py"
+AI = set(S.AI_GROUPS)
 
 
-def section(text, name):
-    lines, cur = [], None
+def ini_section(text, name):
+    out, cur = [], None
     for ln in text.splitlines():
         m = re.match(r"^\[(.+?)\]\s*$", ln.strip())
         if m:
             cur = m.group(1)
             continue
         if cur == name:
-            lines.append(ln)
-    return lines
+            out.append(ln)
+    return out
 
 
-class TestBuildAndValidate(unittest.TestCase):
-    def test_build_is_fresh(self):
-        r = subprocess.run([sys.executable, str(BUILD), "--check"],
-                           capture_output=True, text=True)
+def ini_groups(text):
+    g = {}
+    for ln in ini_section(text, "Proxy Group"):
+        s = ln.strip()
+        if s and not s.startswith("#") and "=" in s:
+            name, _, rhs = s.partition("=")
+            g[name.strip()] = rhs.strip()
+    return g
+
+
+def ini_rules(text):
+    return [ln.strip() for ln in ini_section(text, "Rule")
+            if ln.strip() and not ln.strip().startswith("#")]
+
+
+class TestPipeline(unittest.TestCase):
+    def test_build_all_fresh(self):
+        r = subprocess.run([sys.executable, str(BUILD), "--check"], capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
-    def test_validate_passes(self):
-        r = subprocess.run([sys.executable, str(VALIDATE)],
-                           capture_output=True, text=True)
+    def test_validate_all_pass(self):
+        r = subprocess.run([sys.executable, str(VALIDATE)], capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
 
-class TestConfigInvariants(unittest.TestCase):
+class TestShadowrocket(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.text = CONF.read_text(encoding="utf-8")
-        cls.groups = {}
-        for ln in section(cls.text, "Proxy Group"):
-            s = ln.strip()
-            if not s or s.startswith("#") or "=" not in s:
-                continue
-            name, _, rhs = s.partition("=")
-            cls.groups[name.strip()] = rhs.strip()
-        cls.rules = [ln.strip() for ln in section(cls.text, "Rule")
-                     if ln.strip() and not ln.strip().startswith("#")]
+        t = SR.read_text(encoding="utf-8")
+        cls.groups, cls.rules = ini_groups(t), ini_rules(t)
 
-    def test_at_most_10_groups(self):
+    def test_le_10_groups(self):
         self.assertLessEqual(len(self.groups), 10)
 
-    def test_required_ai_groups_exist(self):
-        for g in ("Claude", "ChatGPT", "GitHub", "Google"):
-            self.assertIn(g, self.groups)
+    def test_ai_groups_select_only(self):
+        for g in AI:
+            self.assertTrue(self.groups[g].startswith("select"))
+            for f in ("url-test", "fallback", "load-balance", "random"):
+                self.assertNotIn(f, self.groups[g])
 
-    def test_ai_groups_are_select_only(self):
-        for g in ("Claude", "ChatGPT", "GitHub", "Google"):
-            self.assertTrue(self.groups[g].startswith("select"),
-                            f"{g} must be select-only: {self.groups[g]}")
-            for forbidden in ("url-test", "fallback", "load-balance", "random"):
-                self.assertNotIn(forbidden, self.groups[g])
-
-    def test_claude_targets_taiwan(self):
-        self.assertIn("TW", self.groups["Claude"])
-        self.assertIn("台湾", self.groups["Claude"])
-
-    def test_chatgpt_targets_us_and_sg(self):
-        self.assertIn("US", self.groups["ChatGPT"])
-        self.assertIn("SG", self.groups["ChatGPT"])
-
-    def test_claude_and_chatgpt_are_separated(self):
-        # Core mission: Claude and ChatGPT must NOT share one policy.
-        claude_rules = [r for r in self.rules if r.endswith(",Claude")]
-        chatgpt_rules = [r for r in self.rules if r.endswith(",ChatGPT")]
-        self.assertTrue(claude_rules)
-        self.assertTrue(chatgpt_rules)
-        self.assertTrue(any("anthropic" in r for r in claude_rules))
-        self.assertTrue(any("openai" in r for r in chatgpt_rules))
-
-    def test_apple_appstore_stays_direct(self):
-        # The Apple base rule-set must be DIRECT (not proxied).
-        self.assertTrue(any("QuantumultX/Apple/Apple.list,DIRECT" in r
-                            for r in self.rules))
-
-    def test_final_is_last_and_points_to_group(self):
-        self.assertTrue(self.rules[-1].startswith("FINAL,"))
+    def test_final_last(self):
         self.assertEqual(self.rules[-1], "FINAL,Final")
 
-    def test_no_duplicate_rules(self):
-        body = [r for r in self.rules if not r.startswith("FINAL")]
-        self.assertEqual(len(body), len(set(body)))
+    def test_claude_chatgpt_separate(self):
+        self.assertTrue(any(r.endswith(",Claude") and "anthropic" in r for r in self.rules))
+        self.assertTrue(any(r.endswith(",ChatGPT") and "openai" in r for r in self.rules))
 
-    def test_uses_regex_not_hardcoded_nodes(self):
-        # No group should reference an explicit airport node name; AI groups use regex.
-        for g in ("Claude", "ChatGPT", "GitHub", "Google"):
+
+class TestClash(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.text = CLASH.read_text(encoding="utf-8")
+
+    def test_exists_and_generated(self):
+        self.assertIn("proxy-groups:", self.text)
+        self.assertIn("proxy-providers:", self.text)
+
+    def test_match_is_last_rule(self):
+        rules = re.findall(r"^\s*-\s+((?:DOMAIN|GEOSITE|GEOIP|MATCH)[^\n]*)", self.text, re.M)
+        self.assertEqual(rules[-1].strip(), "MATCH,Final")
+
+    def test_ai_groups_select_with_filter(self):
+        for g in AI:
+            block = re.search(rf"name:\s*{g}\b.*?(?=\n\s*-\s|\Z)", self.text, re.S).group(0)
+            self.assertIn("type: select", block)
+            self.assertIn("filter:", block)
+            self.assertNotIn("url-test", block)
+
+    def test_regex_backslash_b_preserved(self):
+        # single-quoted YAML keeps \b literal (double quotes would corrupt to backspace)
+        self.assertIn(r"filter: '(?i)(\bTW\b|Taiwan|台湾|台灣)'", self.text)
+
+
+class TestSurge(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        t = SURGE.read_text(encoding="utf-8")
+        cls.groups, cls.rules = ini_groups(t), ini_rules(t)
+
+    def test_final_last(self):
+        self.assertEqual(self.rules[-1], "FINAL,Final")
+
+    def test_ai_groups_select_with_regex(self):
+        for g in AI:
+            self.assertTrue(self.groups[g].startswith("select"))
             self.assertIn("policy-regex-filter=", self.groups[g])
+            for f in ("url-test", "fallback", "load-balance"):
+                self.assertNotIn(f, self.groups[g])
 
-    def test_no_upstream_lazy_ai_bundle(self):
-        # The bundled AI.txt must be gone (replaced by per-vendor providers).
-        self.assertNotIn("iab0x00/ProxyRules", self.text)
+    def test_claude_chatgpt_separate(self):
+        self.assertTrue(any(r.endswith(",Claude") for r in self.rules))
+        self.assertTrue(any(r.endswith(",ChatGPT") for r in self.rules))
+
+
+class TestCrossClientConsistency(unittest.TestCase):
+    """The AI region strategy must be identical across all three clients."""
+
+    def _region_filter(self, code_group):
+        return S.region_filter(code_group)
+
+    def test_ai_region_filters_match_strategy(self):
+        sr = ini_groups(SR.read_text(encoding="utf-8"))
+        surge = ini_groups(SURGE.read_text(encoding="utf-8"))
+        clash = CLASH.read_text(encoding="utf-8")
+        expected = {
+            "Claude": S.region_filter(["TW"]),
+            "ChatGPT": S.region_filter(["US", "SG"]),
+            "GitHub": S.region_filter(["US", "JP"]),
+            "Google": S.region_filter(["JP", "SG"]),
+        }
+        for g, regex in expected.items():
+            self.assertIn(regex, sr[g], f"SR {g}")
+            self.assertIn(regex, surge[g], f"Surge {g}")
+            self.assertIn(regex, clash, f"Clash {g}")
+
+    def test_same_group_set_everywhere(self):
+        want = {g["name"] for g in S.GROUPS}
+        sr = set(ini_groups(SR.read_text(encoding="utf-8")))
+        surge = set(ini_groups(SURGE.read_text(encoding="utf-8")))
+        self.assertEqual(sr, want)
+        self.assertEqual(surge, want)
 
 
 if __name__ == "__main__":

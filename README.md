@@ -2,14 +2,16 @@
 
 # AI-Ultimate-Network
 
-**An AI-first Shadowrocket configuration for developers who live in Claude, ChatGPT, GitHub & Gemini.**
+**An AI-first network config for developers who live in Claude, ChatGPT, GitHub & Gemini — on Shadowrocket, Clash Verge & Surge.**
 
-Stable region-pinned routing for AI services · zero-config node management via regex · built, validated, and versioned like real software.
+Stable region-pinned routing for AI services · zero-config node management via regex · one source of truth, three clients · built, validated, and versioned like real software.
 
 [![validate](https://github.com/yomixiba0225/AI-Ultimate-Network/actions/workflows/validate.yml/badge.svg)](https://github.com/yomixiba0225/AI-Ultimate-Network/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Shadowrocket](https://img.shields.io/badge/Shadowrocket-compatible-blue)
-![version](https://img.shields.io/badge/version-0.1.0-brightgreen)
+![Shadowrocket](https://img.shields.io/badge/Shadowrocket-stable-blue)
+![Clash Verge](https://img.shields.io/badge/Clash%20Verge-beta-orange)
+![Surge](https://img.shields.io/badge/Surge-beta-orange)
+![version](https://img.shields.io/badge/version-0.2.0-brightgreen)
 
 </div>
 
@@ -39,22 +41,31 @@ means it *auto-joins the right group* — **zero config edits**.
 
 ---
 
-## Quick start
+## Supported clients
 
-1. **Add your airport subscription** in Shadowrocket as usual (this is where your nodes come from).
+| Client | File | Platform | Status |
+|---|---|---|---|
+| **Shadowrocket** | [`config/AI-Ultimate.conf`](config/AI-Ultimate.conf) | iOS | ✅ stable |
+| **Clash Verge** (Clash Meta core) | [`config/AI-Ultimate.clash.yaml`](config/AI-Ultimate.clash.yaml) | Windows / macOS / Linux | 🧪 beta |
+| **Surge** | [`config/AI-Ultimate.surge.conf`](config/AI-Ultimate.surge.conf) | macOS / iOS | 🧪 beta |
+
+All three are generated from the **same** `rules/*.list` + `scripts/strategy.py`, so the AI
+strategy (separation, region pinning, regex node selection) is identical on every client — a
+cross-client test guarantees they can't drift. Full per-client setup: **[`docs/USAGE.md`](docs/USAGE.md)**.
+
+## Quick start (Shadowrocket)
+
+1. **Add your airport subscription** in Shadowrocket (this is where your nodes come from).
    Make sure node names contain a region token — `TW / US / SG / JP` or `台湾 / 美国 / 新加坡 / 日本`.
 2. **Import the config.** In Shadowrocket → Config → add from URL:
    ```
    https://raw.githubusercontent.com/yomixiba0225/AI-Ultimate-Network/main/config/AI-Ultimate.conf
    ```
-   (or download [`config/AI-Ultimate.conf`](config/AI-Ultimate.conf) and import the file).
-3. **Pick your nodes once.** Open the `Claude`, `ChatGPT`, `GitHub`, `Google` groups and select a
-   node in each. They stay put — no auto-switching.
+3. **Pick your nodes once** in the `Claude`, `ChatGPT`, `GitHub`, `Google` groups. They stay put.
 4. Done. New nodes you add later show up automatically in the matching groups.
 
-> **Optional — pin a preferred node.** To make a group default to a specific node (e.g. Berry
-> Hinet for Claude), add one line in `config/AI-Ultimate.template.conf`:
-> `Claude = select, policy-regex-filter=..., policy-select-name=<exact node name>` then rebuild.
+> **Clash Verge / Surge users:** see **[`docs/USAGE.md`](docs/USAGE.md)** — one line to point at
+> your airport subscription, then pick nodes in the same four groups.
 
 ---
 
@@ -84,24 +95,24 @@ Anthropic → OpenAI → GitHub → Google → Apple → China → Proxy → Fin
 
 ## How it's built (configuration-as-code)
 
-You never hand-edit the shipped config. You edit the **template** and the **rule providers**,
-then run the build:
+You never hand-edit the shipped configs. You edit the **rule providers** + **strategy**, then
+one build emits all three clients:
 
 ```
-config/AI-Ultimate.template.conf   ─┐
-rules/anthropic.list                │   python3 scripts/build.py
-rules/openai.list                   ├──────────────────────────▶  config/AI-Ultimate.conf
-rules/github.list  ...              │   (expands #!INCLUDE markers)
-rules/*.list                       ─┘
+scripts/strategy.py   ─┐                         ┌─▶ config/AI-Ultimate.conf         (Shadowrocket)
+rules/anthropic.list   │   python3 scripts/build.py ─┼─▶ config/AI-Ultimate.clash.yaml   (Clash Verge)
+rules/openai.list      ├────────────────────────▶ └─▶ config/AI-Ultimate.surge.conf   (Surge)
+rules/*.list          ─┘   (Shadowrocket also uses config/AI-Ultimate.template.conf)
 ```
 
 ```bash
-python3 scripts/build.py            # regenerate config/AI-Ultimate.conf
-python3 scripts/validate.py         # syntax, ≤10 groups, AI=select-only, refs, order, FINAL-last
-python3 -m unittest discover -s tests   # acceptance tests
+python3 scripts/build.py            # regenerate ALL client configs
+python3 scripts/build.py --target clash   # or just one
+python3 scripts/validate.py         # ≤10 groups, AI=select-only, refs, order, FINAL/MATCH-last — all clients
+python3 -m unittest discover -s tests   # acceptance + cross-client consistency tests
 ```
 
-CI runs all three on every push/PR ([`.github/workflows/validate.yml`](.github/workflows/validate.yml)).
+CI runs build → freshness → validate → tests on every push/PR ([`.github/workflows/validate.yml`](.github/workflows/validate.yml)).
 
 ### Add an AI service in 30 seconds
 
@@ -116,21 +127,24 @@ CI runs all three on every push/PR ([`.github/workflows/validate.yml`](.github/w
 ```
 AI-Ultimate-Network/
 ├── config/
-│   ├── AI-Ultimate.conf            # ← GENERATED, import this
-│   ├── AI-Ultimate.template.conf   # ← edit this
+│   ├── AI-Ultimate.conf            # ← GENERATED — Shadowrocket
+│   ├── AI-Ultimate.clash.yaml      # ← GENERATED — Clash Verge / Meta
+│   ├── AI-Ultimate.surge.conf      # ← GENERATED — Surge
+│   ├── AI-Ultimate.template.conf   # Shadowrocket template (edit this)
 │   └── lazy.conf                   # original baseline, kept for reference/rollback
-├── rules/                          # per-vendor rule providers (source of truth)
+├── rules/                          # per-vendor rule providers (shared source of truth)
 │   ├── anthropic.list  openai.list  github.list  google.list
 │   ├── apple.list  ai-extra.list  china.list  proxy.list
 ├── scripts/
-│   ├── build.py                    # template + rules  → config
-│   └── validate.py                 # quality gate
-├── tests/test_config.py            # acceptance tests (stdlib unittest)
+│   ├── strategy.py                 # client-agnostic strategy (groups/regions/order)
+│   ├── build.py                    # strategy + rules → all 3 client configs
+│   └── validate.py                 # quality gate (all clients)
+├── tests/test_config.py            # acceptance + cross-client consistency tests
 ├── docs/
 │   ├── 01_PROJECT_CHARTER.md  02_PRD.md.md  03_ARCHITECTURE.md
 │   ├── CONFIG_ANALYSIS.md  LAZY_ANALYSIS.md  GAP_ANALYSIS.md  DESIGN.md
-│   ├── IMPLEMENTATION_PLAN.md  ROADMAP.md
-│   └── adr/                        # architecture decision records
+│   ├── USAGE.md  IMPLEMENTATION_PLAN.md  ROADMAP.md
+│   └── adr/                        # architecture decision records (ADR-0001…0007)
 ├── .github/                        # CI + issue/PR templates
 ├── CHANGELOG.md   LICENSE   .gitignore
 ```
@@ -152,8 +166,9 @@ AI-Ultimate-Network/
 
 ## Roadmap
 
-Multi-client generation (Clash Meta / Verge / Surge) from the same providers is planned — see
-[`docs/ROADMAP.md`](docs/ROADMAP.md).
+Multi-client generation (Shadowrocket / Clash Verge / Surge) shipped in v0.2.0. Next: richer
+non-AI coverage for Clash/Surge, provider pinning, and device-verified promotion of the beta
+clients to stable — see [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Documentation
 

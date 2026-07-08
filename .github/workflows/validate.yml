@@ -16,13 +16,16 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Build config from template + rules
+      - name: Install optional YAML validator
+        run: pip install pyyaml
+
+      - name: Build all client configs (Shadowrocket / Clash / Surge)
         run: python3 scripts/build.py
 
       - name: Fail if committed config is stale
         run: python3 scripts/build.py --check
 
-      - name: Validate config (syntax / groups / order / refs)
+      - name: Validate all configs (groups / order / refs / regex)
         run: python3 scripts/validate.py
 
       - name: Run acceptance tests

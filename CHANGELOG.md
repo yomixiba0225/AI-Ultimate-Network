@@ -4,6 +4,34 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-07-08
+
+Multi-client release. The same AI-first strategy now generates configs for three clients from
+one source of truth.
+
+### Added
+- **Clash Meta / Clash Verge** config: `config/AI-Ultimate.clash.yaml` (Windows / macOS / Linux).
+  Region-regex node selection via `proxy-providers` + group `filter`; AI routing inlined; bulk
+  routing via built-in `GEOSITE` / `GEOIP` (no fragile external rule lists).
+- **Surge** config: `config/AI-Ultimate.surge.conf` (macOS / iOS). `include-all-proxies` +
+  `policy-regex-filter`; AI inlined; `GEOIP,CN` + `FINAL`.
+- `scripts/strategy.py` — single client-agnostic source of truth (regions, groups, order) shared
+  by all emitters.
+- `scripts/build.py --target {shadowrocket,clash,surge}` multi-target build (default: all).
+- Cross-client consistency tests: AI region filters and group set must be identical on every
+  client (they can't silently drift).
+- `docs/USAGE.md` (per-client setup) and `docs/adr/ADR-0007-multi-client-generation.md`.
+- CI installs PyYAML and validates the Clash YAML parses.
+
+### Changed
+- `scripts/validate.py` now validates all three client configs (Shadowrocket, Clash, Surge).
+- README documents supported clients and the one-source-three-clients build.
+
+### Notes
+- Shadowrocket config is **unchanged** (byte-identical) — existing users are unaffected.
+- Clash Verge and Surge are **beta**: generated to spec and structurally validated, but not yet
+  device-verified by the maintainer.
+
 ## [0.1.0] - 2026-07-08
 
 First engineered release. Turns the stock `lazy.conf` into an AI-first, buildable,
@@ -45,4 +73,5 @@ validated configuration project.
   `skip-proxy`, `hijack-dns`, `block-quic=all-proxy`. Original baseline kept at
   `config/lazy.conf` for reference and rollback.
 
+[0.2.0]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.0
 [0.1.0]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.1.0
