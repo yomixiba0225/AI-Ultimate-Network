@@ -9,7 +9,7 @@ Stable region-pinned routing for AI services · zero-config node management via 
 [![validate](https://github.com/yomixiba0225/AI-Ultimate-Network/actions/workflows/validate.yml/badge.svg)](https://github.com/yomixiba0225/AI-Ultimate-Network/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Shadowrocket](https://img.shields.io/badge/Shadowrocket-compatible-blue)
-![version](https://img.shields.io/badge/version-1.0.0-brightgreen)
+![version](https://img.shields.io/badge/version-0.1.0-brightgreen)
 
 </div>
 

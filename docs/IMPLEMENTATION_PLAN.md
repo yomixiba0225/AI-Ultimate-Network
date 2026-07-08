@@ -2,7 +2,7 @@
 
 **Phase:** 5 — Implementation Plan (milestones)
 **Project:** AI-Ultimate-Network
-**Status:** M1–M6 executed in the v1.0.0 build; M7 (push/release) pending user confirmation.
+**Status:** M1–M6 executed in the v0.1.0 build; M7 (push/release) pending user confirmation.
 
 Each milestone lists **Deliverables · Dependencies · Acceptance Criteria · Rollback**.
 Milestones map to the gap clusters in `GAP_ANALYSIS.md` §7 and the design in `DESIGN.md` §9.
@@ -112,7 +112,7 @@ release from the repo alone (Master §Final Objective).
 
 **Deliverables**
 - `git init` + conventional-commit history.
-- Tag `v1.0.0` + GitHub release notes (from CHANGELOG).
+- Tag `v0.1.0` + GitHub release notes (from CHANGELOG).
 - Push to `github.com/yomixiba0225/AI-Ultimate-Network`.
 
 **Dependencies** — M1–M6; **quality gates green**.

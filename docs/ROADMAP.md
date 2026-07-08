@@ -5,7 +5,7 @@ Semantic Versioning. Dates are targets, not commitments.
 
 ---
 
-## v1.0.0 — AI-first Shadowrocket ✅ (2026-07-08)
+## v0.1.0 — AI-first Shadowrocket ✅ (2026-07-08)
 
 - 8 strategy groups, AI Select-only, regex node selection.
 - Per-vendor rule providers; build + validate + tests + CI.

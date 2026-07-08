@@ -4,7 +4,7 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2026-07-08
+## [0.1.0] - 2026-07-08
 
 First engineered release. Turns the stock `lazy.conf` into an AI-first, buildable,
 validated configuration project.
@@ -45,4 +45,4 @@ validated configuration project.
   `skip-proxy`, `hijack-dns`, `block-quic=all-proxy`. Original baseline kept at
   `config/lazy.conf` for reference and rollback.
 
-[1.0.0]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v1.0.0
+[0.1.0]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.1.0
