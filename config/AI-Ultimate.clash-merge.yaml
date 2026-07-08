@@ -7,10 +7,10 @@
 #  rules onto EVERY subscription automatically. No node URLs needed.
 # ============================================================================
 prepend-proxy-groups:
-  - {name: Claude, type: select, include-all: true, filter: '(?i)(\bTW\b|Taiwan|台湾|台灣)'}
-  - {name: ChatGPT, type: select, include-all: true, filter: '(?i)(\bUS\b|USA|美国|美國|\bSG\b|Singapore|新加坡|狮城)'}
-  - {name: GitHub, type: select, include-all: true, filter: '(?i)(\bUS\b|USA|美国|美國|\bJP\b|Japan|日本)'}
-  - {name: Google, type: select, include-all: true, filter: '(?i)(\bJP\b|Japan|日本|\bSG\b|Singapore|新加坡|狮城)'}
+  - {name: Claude, type: select, include-all: true, filter: '(?i)(\bTW\b|Taiwan|台湾|台灣)', proxies: [Proxy]}
+  - {name: ChatGPT, type: select, include-all: true, filter: '(?i)(\bUS\b|USA|美国|美國|\bSG\b|Singapore|新加坡|狮城)', proxies: [Proxy]}
+  - {name: GitHub, type: select, include-all: true, filter: '(?i)(\bUS\b|USA|美国|美國|\bJP\b|Japan|日本)', proxies: [Proxy]}
+  - {name: Google, type: select, include-all: true, filter: '(?i)(\bJP\b|Japan|日本|\bSG\b|Singapore|新加坡|狮城)', proxies: [Proxy]}
   - {name: Proxy, type: select, include-all: true, filter: '.*'}
   - {name: Apple, type: select, proxies: [DIRECT, Proxy]}
 prepend-rules:

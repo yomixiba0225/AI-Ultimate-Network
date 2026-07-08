@@ -105,6 +105,8 @@ def build_clash() -> str:
             L.append(f"    type: select")
             L.append(f"    use: [airport]")
             L.append(f"    filter: '{flt}'")
+            if isinstance(g.get("regions"), list):  # AI group: never let an empty region
+                L.append(f"    proxies: [Proxy]")   # break the whole config (Mihomo rejects empty groups)
     L.append("")
     L.append("rules:")
     # 1. local provider inlines (precise AI routing), canonical order
@@ -187,7 +189,10 @@ def build_clash_merge() -> str:
         if flt is None:  # Apple -> member list
             members = ", ".join(g["members"])
             L.append(f"  - {{name: {name}, type: select, proxies: [{members}]}}")
-        else:
+        elif isinstance(g.get("regions"), list):  # AI group: fallback to Proxy so an empty
+            L.append(f"  - {{name: {name}, type: select, include-all: true, filter: '{flt}', "
+                     f"proxies: [Proxy]}}")       # region never breaks the whole config
+        else:  # Proxy (matches all) — never empty, no fallback needed
             L.append(f"  - {{name: {name}, type: select, include-all: true, filter: '{flt}'}}")
     L.append("prepend-rules:")
     merge_tiers = [

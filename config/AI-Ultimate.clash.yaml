@@ -26,18 +26,22 @@ proxy-groups:
     type: select
     use: [airport]
     filter: '(?i)(\bTW\b|Taiwan|台湾|台灣)'
+    proxies: [Proxy]
   - name: ChatGPT
     type: select
     use: [airport]
     filter: '(?i)(\bUS\b|USA|美国|美國|\bSG\b|Singapore|新加坡|狮城)'
+    proxies: [Proxy]
   - name: GitHub
     type: select
     use: [airport]
     filter: '(?i)(\bUS\b|USA|美国|美國|\bJP\b|Japan|日本)'
+    proxies: [Proxy]
   - name: Google
     type: select
     use: [airport]
     filter: '(?i)(\bJP\b|Japan|日本|\bSG\b|Singapore|新加坡|狮城)'
+    proxies: [Proxy]
   - name: Proxy
     type: select
     use: [airport]
