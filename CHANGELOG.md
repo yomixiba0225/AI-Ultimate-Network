@@ -4,6 +4,17 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2026-07-08
+
+### Changed
+- **Global Script is now multi-airport-fusion ready.** The AI groups in
+  `config/AI-Ultimate.clash-script.js` build with `include-all: true` + `filter` instead of a
+  list derived from `config.proxies`. Nodes fused in via `proxy-providers` (a second/third
+  airport) live in the provider, not `config.proxies`, so the old approach missed them;
+  `include-all` pulls from the main subscription **and** every fused provider. Each AI group keeps
+  a `proxies: [Proxy]` fallback so a region with no node can't break the config. `docs/USAGE.md`
+  gains a multi-airport fusion note.
+
 ## [0.2.3] - 2026-07-08
 
 ### Added
@@ -106,6 +117,7 @@ validated configuration project.
   `skip-proxy`, `hijack-dns`, `block-quic=all-proxy`. Original baseline kept at
   `config/lazy.conf` for reference and rollback.
 
+[0.2.4]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.4
 [0.2.3]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.3
 [0.2.2]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.2
 [0.2.1]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.1

@@ -57,9 +57,32 @@ the Script instead. Use `config/AI-Ultimate.clash-script.js`.
 4. **订阅** page → click your profile card to regenerate. **代理** page now shows
    `Claude / ChatGPT / GitHub / Google / Proxy / Apple` + your original group.
 
-Why it's reliable: the script builds each group's node list from your **live** nodes (no
-`include-all`, no empty-group crash, not clobbered by merge ordering). A region with no node
-falls back to `Proxy` (never DIRECT). Works across all subscriptions automatically.
+Why it's reliable: the script builds groups with `include-all: true` + region `filter`, so they
+pull nodes from the active subscription **and** any airport you fuse in via `proxy-providers`.
+A region with no node falls back to `Proxy` (never DIRECT), so an empty region can't break the
+config. Not clobbered by merge ordering.
+
+#### Multi-airport fusion (combining two+ airports)
+
+To blend nodes from a second airport into the same groups:
+
+1. In the **Global Merge** (YAML — native keys only), add a provider:
+   ```yaml
+   proxy-providers:
+     airport2:
+       type: http
+       url: "<second airport's Clash subscription URL>"
+       interval: 3600
+       path: ./providers/airport2.yaml
+       # Some airports gate on User-Agent (e.g. ToLink returns 401 with the default UA):
+       header: { User-Agent: ["clash-verge/v2.5.1"] }
+       health-check: { enable: true, url: http://www.gstatic.com/generate_204, interval: 300 }
+   ```
+2. Nothing else to change: the Script's groups use `include-all`, so airport2's nodes join
+   `Claude/ChatGPT/GitHub/Google/Proxy` automatically by region regex.
+3. Only adjust the region regex if the new airport names nodes without a region token
+   (`TW/US/SG/JP` or `台湾/美国/新加坡/日本`).
+4. Reload the profile (订阅 → ⋯ → 使用) and re-pick nodes if needed.
 
 ### 2A. Multiple subscriptions — Global Merge overlay (if you have NO Global Script)
 

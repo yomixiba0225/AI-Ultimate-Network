@@ -5,32 +5,22 @@
 // Put this in Clash Verge:  设置 → 全局扩展脚本 (Global Script).
 // If you ALREADY have a Global Script (e.g. Adobe block), keep ONE main() and paste
 // only the code between "BEGIN" and "END" inside it, just before `return config`.
-// Works across EVERY subscription automatically — builds groups from the live nodes.
+//
+// Groups use include-all + filter, so they pull nodes from the main subscription AND
+// any airports you fuse in via proxy-providers (multi-airport). A region with no node
+// falls back to Proxy (never DIRECT), so an empty region can't break the config.
 // ============================================================================
 function main(config) {
   // ===== AI-Ultimate-Network BEGIN =====
-  var names = (config.proxies || []).map(function (p) { return p.name; });
-  var pick = function (re) { return names.filter(function (n) { return re.test(n); }); };
-  var R = {
-    TW: /(\bTW\b|Taiwan|台湾|台灣)/i,
-    US: /(\bUS\b|USA|美国|美國)/i,
-    SG: /(\bSG\b|Singapore|新加坡|狮城)/i,
-    JP: /(\bJP\b|Japan|日本)/i
-  };
-  var region = function () {
-    var a = [];
-    for (var i = 0; i < arguments.length; i++) a = a.concat(pick(R[arguments[i]]));
-    return a.filter(function (v, idx) { return a.indexOf(v) === idx; });
-  };
-  var sel = function (name, list) {
-    return { name: name, type: "select", proxies: (list.length ? list : ["Proxy"]) };
+  var mk = function (name, filter) {
+    return { name: name, type: "select", "include-all": true, filter: filter, proxies: ["Proxy"] };
   };
   var aiGroups = [
-    sel("Claude", region("TW")),
-    sel("ChatGPT", region("US", "SG")),
-    sel("GitHub", region("US", "JP")),
-    sel("Google", region("JP", "SG")),
-    { name: "Proxy", type: "select", proxies: (names.length ? names : ["DIRECT"]) },
+    mk("Claude", "(?i)(\\bTW\\b|Taiwan|台湾|台灣)"),
+    mk("ChatGPT", "(?i)(\\bUS\\b|USA|美国|美國|\\bSG\\b|Singapore|新加坡|狮城)"),
+    mk("GitHub", "(?i)(\\bUS\\b|USA|美国|美國|\\bJP\\b|Japan|日本)"),
+    mk("Google", "(?i)(\\bJP\\b|Japan|日本|\\bSG\\b|Singapore|新加坡|狮城)"),
+    { name: "Proxy", type: "select", "include-all": true },
     { name: "Apple", type: "select", proxies: ["DIRECT", "Proxy"] }
   ];
   config["proxy-groups"] = aiGroups.concat(config["proxy-groups"] || []);

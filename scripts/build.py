@@ -234,6 +234,10 @@ def build_clash_script() -> str:
     rules += ["GEOSITE,github,GitHub", "GEOSITE,apple,DIRECT",
               "GEOSITE,geolocation-cn,DIRECT", "GEOIP,CN,DIRECT,no-resolve"]
     rules_js = ",\n    ".join(json.dumps(r) for r in rules)
+    f_claude = json.dumps(S.region_filter(["TW"]), ensure_ascii=False)
+    f_chatgpt = json.dumps(S.region_filter(["US", "SG"]), ensure_ascii=False)
+    f_github = json.dumps(S.region_filter(["US", "JP"]), ensure_ascii=False)
+    f_google = json.dumps(S.region_filter(["JP", "SG"]), ensure_ascii=False)
     return f'''// ============================================================================
 // AI-Ultimate-Network — Clash Verge GLOBAL SCRIPT. GENERATED — DO NOT EDIT.
 // Rebuild: python3 scripts/build.py --target clash-script
@@ -241,32 +245,22 @@ def build_clash_script() -> str:
 // Put this in Clash Verge:  设置 → 全局扩展脚本 (Global Script).
 // If you ALREADY have a Global Script (e.g. Adobe block), keep ONE main() and paste
 // only the code between "BEGIN" and "END" inside it, just before `return config`.
-// Works across EVERY subscription automatically — builds groups from the live nodes.
+//
+// Groups use include-all + filter, so they pull nodes from the main subscription AND
+// any airports you fuse in via proxy-providers (multi-airport). A region with no node
+// falls back to Proxy (never DIRECT), so an empty region can't break the config.
 // ============================================================================
 function main(config) {{
   // ===== AI-Ultimate-Network BEGIN =====
-  var names = (config.proxies || []).map(function (p) {{ return p.name; }});
-  var pick = function (re) {{ return names.filter(function (n) {{ return re.test(n); }}); }};
-  var R = {{
-    TW: /(\\bTW\\b|Taiwan|台湾|台灣)/i,
-    US: /(\\bUS\\b|USA|美国|美國)/i,
-    SG: /(\\bSG\\b|Singapore|新加坡|狮城)/i,
-    JP: /(\\bJP\\b|Japan|日本)/i
-  }};
-  var region = function () {{
-    var a = [];
-    for (var i = 0; i < arguments.length; i++) a = a.concat(pick(R[arguments[i]]));
-    return a.filter(function (v, idx) {{ return a.indexOf(v) === idx; }});
-  }};
-  var sel = function (name, list) {{
-    return {{ name: name, type: "select", proxies: (list.length ? list : ["Proxy"]) }};
+  var mk = function (name, filter) {{
+    return {{ name: name, type: "select", "include-all": true, filter: filter, proxies: ["Proxy"] }};
   }};
   var aiGroups = [
-    sel("Claude", region("TW")),
-    sel("ChatGPT", region("US", "SG")),
-    sel("GitHub", region("US", "JP")),
-    sel("Google", region("JP", "SG")),
-    {{ name: "Proxy", type: "select", proxies: (names.length ? names : ["DIRECT"]) }},
+    mk("Claude", {f_claude}),
+    mk("ChatGPT", {f_chatgpt}),
+    mk("GitHub", {f_github}),
+    mk("Google", {f_google}),
+    {{ name: "Proxy", type: "select", "include-all": true }},
     {{ name: "Apple", type: "select", proxies: ["DIRECT", "Proxy"] }}
   ];
   config["proxy-groups"] = aiGroups.concat(config["proxy-groups"] || []);
