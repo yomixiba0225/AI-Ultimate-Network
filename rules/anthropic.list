@@ -1,0 +1,12 @@
+# anthropic.list — Anthropic / Claude
+# Target group: Claude  (Select-only, default Taiwan)
+# Source of truth for the build; policy/group is assigned at build time.
+# Format: one rule per line, TYPE,value  (NO trailing policy).
+# Add new Claude/Anthropic domains here — no config surgery needed elsewhere.
+#
+# See docs/adr/ADR-0001-claude-taiwan.md and docs/adr/ADR-0004-select-only-ai.md
+DOMAIN-SUFFIX,claude.ai
+DOMAIN-SUFFIX,anthropic.com
+DOMAIN-SUFFIX,claude.com
+DOMAIN-SUFFIX,claudeusercontent.com
+DOMAIN-KEYWORD,anthropic

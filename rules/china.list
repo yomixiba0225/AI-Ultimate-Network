@@ -1,0 +1,9 @@
+# china.list — extra China-direct domains (supplements remote CN rule-sets)
+# Target policy: DIRECT
+# Format: one rule per line, TYPE,value  (NO trailing policy).
+#
+# The bulk of China routing is handled by remote rule-sets in the template
+# (BiliBili, WeChat, Baidu, DouBan, Sina, Zhihu, XiaoHongShu, DouYin, China,
+# plus GEOIP,CN). Add domains here only when a service is missing upstream.
+# DeepSeek is a domestic AI service and works best DIRECT:
+DOMAIN-SUFFIX,deepseek.com

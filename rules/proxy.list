@@ -1,0 +1,11 @@
+# proxy.list — extra generic-foreign domains (supplements remote lists)
+# Target group: Proxy
+# Format: one rule per line, TYPE,value  (NO trailing policy).
+#
+# Most generic foreign routing is handled by remote rule-sets in the template
+# (YouTube, Netflix, Twitter, Telegram, etc.) plus FINAL -> Proxy. Add domains
+# here for foreign sites you want on Proxy that upstream lists miss.
+DOMAIN-SUFFIX,wikipedia.org
+DOMAIN-SUFFIX,medium.com
+DOMAIN-SUFFIX,v2ex.com
+DOMAIN-SUFFIX,reddit.com

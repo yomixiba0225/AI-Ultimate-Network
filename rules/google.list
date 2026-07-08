@@ -1,0 +1,15 @@
+# google.list — Google AI surface (Gemini / AI Studio / DeepMind / NotebookLM)
+# Target group: Google  (Select-only, prefer Japan, backup Singapore; avoid HK)
+# Format: one rule per line, TYPE,value  (NO trailing policy).
+# NOTE: broad Google coverage comes from the remote blackmatrix7 Google
+# rule-set (retargeted to the Google group). These specific AI subdomains are
+# listed locally so Gemini/AI-Studio deterministically hit the Google group.
+DOMAIN-SUFFIX,gemini.google.com
+DOMAIN-SUFFIX,aistudio.google.com
+DOMAIN-SUFFIX,ai.google.dev
+DOMAIN-SUFFIX,generativelanguage.googleapis.com
+DOMAIN-SUFFIX,notebooklm.google.com
+DOMAIN-SUFFIX,bard.google.com
+DOMAIN-SUFFIX,deepmind.com
+DOMAIN-SUFFIX,deepmind.google
+DOMAIN,labs.google

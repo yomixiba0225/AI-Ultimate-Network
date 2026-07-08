@@ -1,0 +1,18 @@
+# apple.list — Apple + Apple Intelligence / Private Relay / Siri
+# Target group: Apple  (Select; DEFAULT = DIRECT, override to Proxy available)
+# Format: one rule per line, TYPE,value  (NO trailing policy).
+#
+# WHY here: in the stock baseline these Apple Intelligence / Private-Relay
+# domains were bundled into AI.txt and sent to PROXY. The project mandates
+# Apple -> DIRECT (PRD 13 / FR-005). We route them to the Apple group, whose
+# default is DIRECT. Users who WANT Apple Intelligence (geo-gated) can flip the
+# Apple group to Proxy in-app — one tap, no config edit.
+# See docs/adr/ADR-0003-apple-direct.md
+DOMAIN-SUFFIX,apps.mzstatic.com
+DOMAIN,smoot.apple.com
+DOMAIN,gspe1-ssl.ls.apple.com
+DOMAIN,guzzoni.apple.com
+DOMAIN,apple-relay.apple.com
+DOMAIN,apple-relay.cloudflare.com
+DOMAIN,apple-relay.fastly-edge.com
+DOMAIN,cp4.cloudflare.com

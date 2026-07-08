@@ -1,0 +1,14 @@
+# github.list — GitHub + GitHub Copilot
+# Target group: GitHub  (Select-only, prefer US residential, backup Japan)
+# Format: one rule per line, TYPE,value  (NO trailing policy).
+# NOTE: broad GitHub coverage also comes from the remote blackmatrix7 GitHub
+# rule-set (retargeted to the GitHub group in the template). These are the
+# high-value / Copilot domains guaranteed to hit the GitHub group first.
+DOMAIN-SUFFIX,github.com
+DOMAIN-SUFFIX,githubusercontent.com
+DOMAIN-SUFFIX,githubassets.com
+DOMAIN-SUFFIX,githubcopilot.com
+DOMAIN-SUFFIX,github.io
+DOMAIN-SUFFIX,github.dev
+DOMAIN-SUFFIX,githubapp.com
+DOMAIN-SUFFIX,ghcr.io

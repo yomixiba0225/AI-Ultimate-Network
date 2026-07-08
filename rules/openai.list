@@ -1,0 +1,18 @@
+# openai.list — OpenAI / ChatGPT / Codex / Sora
+# Target group: ChatGPT  (Select-only, default US, backup Singapore)
+# Format: one rule per line, TYPE,value  (NO trailing policy).
+#
+# See docs/adr/ADR-0002-chatgpt-us.md and docs/adr/ADR-0004-select-only-ai.md
+DOMAIN-SUFFIX,openai.com
+DOMAIN-SUFFIX,chatgpt.com
+DOMAIN-SUFFIX,chat.com
+DOMAIN-SUFFIX,sora.com
+DOMAIN-SUFFIX,oaistatic.com
+DOMAIN-SUFFIX,oaiusercontent.com
+DOMAIN-SUFFIX,livekit.cloud
+DOMAIN,openaiapi-site.azureedge.net
+DOMAIN,api.statsig.com
+DOMAIN,api-iam.intercom.io
+DOMAIN,o33249.ingest.sentry.io
+DOMAIN-KEYWORD,openaiapi
+DOMAIN-KEYWORD,openaicom

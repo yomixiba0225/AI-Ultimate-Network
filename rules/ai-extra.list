@@ -1,0 +1,25 @@
+# ai-extra.list — Other AI services not (yet) given a dedicated group
+# Target group: Proxy  (generic foreign; region-agnostic)
+# Format: one rule per line, TYPE,value  (NO trailing policy).
+#
+# Rationale: the project caps strategy groups at <=10 (ARCH 7). Claude, ChatGPT,
+# GitHub, Google earn dedicated groups; the long tail of AI vendors routes
+# through the generic Proxy group. Promote any of these to its own group later
+# by adding a group + moving its lines to a new list — no architectural change.
+# See docs/adr/ADR-0004-select-only-ai.md
+#
+# Perplexity
+DOMAIN-SUFFIX,perplexity.ai
+DOMAIN-SUFFIX,pplx.ai
+DOMAIN,pplx-res.cloudinary.com
+# xAI / Grok
+DOMAIN-SUFFIX,x.ai
+DOMAIN-SUFFIX,grok.com
+# OpenRouter
+DOMAIN-SUFFIX,openrouter.ai
+# Microsoft Copilot (Bing/Sydney)
+DOMAIN,copilot.microsoft.com
+DOMAIN,sydney.bing.com
+# Future (add as needed): DeepSeek, Mistral, Cohere, Poe ...
+DOMAIN-SUFFIX,mistral.ai
+DOMAIN-SUFFIX,cohere.com
