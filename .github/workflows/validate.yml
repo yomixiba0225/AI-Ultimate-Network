@@ -1,0 +1,29 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-validate-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Build config from template + rules
+        run: python3 scripts/build.py
+
+      - name: Fail if committed config is stale
+        run: python3 scripts/build.py --check
+
+      - name: Validate config (syntax / groups / order / refs)
+        run: python3 scripts/validate.py
+
+      - name: Run acceptance tests
+        run: python3 -m unittest discover -s tests -v
