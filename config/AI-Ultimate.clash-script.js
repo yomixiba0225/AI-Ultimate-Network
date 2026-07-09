@@ -17,9 +17,10 @@ function main(config) {
   };
   var aiGroups = [
     mk("Claude", "(?i)(\\bTW\\b|Taiwan|台湾|台灣)"),
-    mk("ChatGPT", "(?i)(\\bUS\\b|USA|美国|美國|\\bSG\\b|Singapore|新加坡|狮城)"),
-    mk("GitHub", "(?i)(\\bUS\\b|USA|美国|美國|\\bJP\\b|Japan|日本)"),
-    mk("Google", "(?i)(\\bJP\\b|Japan|日本|\\bSG\\b|Singapore|新加坡|狮城)"),
+    mk("ChatGPT", "(?i)(\\bUS\\b|USA|美国|美國|\\bSG\\b|Singapore|新加坡|狮城|\\bJP\\b|Japan|日本|\\bHK\\b|Hong ?Kong|香港)"),
+    mk("GitHub", "(?i)(\\bHK\\b|Hong ?Kong|香港)"),
+    mk("Google", "(?i)(\\bHK\\b|Hong ?Kong|香港|\\bJP\\b|Japan|日本|\\bSG\\b|Singapore|新加坡|狮城|\\bUS\\b|USA|美国|美國)"),
+    mk("TikTok", "(?i)(\\bJP\\b|Japan|日本|\\bTW\\b|Taiwan|台湾|台灣|\\bSG\\b|Singapore|新加坡|狮城)"),
     { name: "Proxy", type: "select", "include-all": true },
     { name: "Apple", type: "select", proxies: ["DIRECT", "Proxy"] }
   ];
@@ -68,6 +69,19 @@ function main(config) {
     "DOMAIN,apple-relay.cloudflare.com,Apple",
     "DOMAIN,apple-relay.fastly-edge.com,Apple",
     "DOMAIN,cp4.cloudflare.com,Apple",
+    "DOMAIN-SUFFIX,tiktok.com,TikTok",
+    "DOMAIN-SUFFIX,tiktokv.com,TikTok",
+    "DOMAIN-SUFFIX,tiktokcdn.com,TikTok",
+    "DOMAIN-SUFFIX,tiktokcdn-us.com,TikTok",
+    "DOMAIN-SUFFIX,tiktokv.us,TikTok",
+    "DOMAIN-SUFFIX,tiktokmusic.app,TikTok",
+    "DOMAIN-SUFFIX,byteoversea.com,TikTok",
+    "DOMAIN-SUFFIX,ibyteimg.com,TikTok",
+    "DOMAIN-SUFFIX,ibytedtos.com,TikTok",
+    "DOMAIN-SUFFIX,muscdn.com,TikTok",
+    "DOMAIN-SUFFIX,ttwstatic.com,TikTok",
+    "DOMAIN-SUFFIX,tik-tokapi.com,TikTok",
+    "DOMAIN-KEYWORD,tiktok,TikTok",
     "DOMAIN-SUFFIX,perplexity.ai,Proxy",
     "DOMAIN-SUFFIX,pplx.ai,Proxy",
     "DOMAIN,pplx-res.cloudinary.com,Proxy",
@@ -80,6 +94,7 @@ function main(config) {
     "DOMAIN-SUFFIX,cohere.com,Proxy",
     "DOMAIN-SUFFIX,deepseek.com,DIRECT",
     "GEOSITE,github,GitHub",
+    "GEOSITE,tiktok,TikTok",
     "GEOSITE,apple,DIRECT",
     "GEOSITE,geolocation-cn,DIRECT",
     "GEOIP,CN,DIRECT,no-resolve"

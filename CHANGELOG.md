@@ -4,6 +4,22 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-07-08
+
+Strategy rebalance (user request). Region assignments changed and a new group added; still
+9 groups (≤10). All clients regenerated from `strategy.py`; cross-client parity tests updated.
+
+### Added
+- **TikTok** strategy group (Select-only) → Japan / Taiwan / Singapore. New `rules/tiktok.list`
+  + `GEOSITE,tiktok` routing on Clash; the Shadowrocket TikTok rule-set moved from `Proxy` to
+  the TikTok group. New region **HK** (Hong Kong) added to the region regex table.
+
+### Changed
+- **ChatGPT** (covers Codex — one group): US → **US / SG / JP / HK**.
+- **GitHub**: US/JP → **HK**.
+- **Google**: JP/SG → **HK / JP / SG / US** (HK now allowed, superseding the earlier avoid-HK note).
+- Claude unchanged (Taiwan). See `docs/adr/ADR-0008-region-rebalance.md`.
+
 ## [0.2.4] - 2026-07-08
 
 ### Changed
@@ -117,6 +133,7 @@ validated configuration project.
   `skip-proxy`, `hijack-dns`, `block-quic=all-proxy`. Original baseline kept at
   `config/lazy.conf` for reference and rollback.
 
+[0.3.0]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.0
 [0.2.4]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.4
 [0.2.3]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.3
 [0.2.2]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.2

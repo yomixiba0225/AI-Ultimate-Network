@@ -37,6 +37,7 @@ BUILTINS = {"DIRECT", "PROXY", "REJECT", "REJECT-DROP", "REJECT-NO-DROP", "REJEC
             "REJECT-IMG", "REJECT-TINYGIF", "REJECT-DICT", "REJECT-ARRAY", "TAILSCALE",
             "MATCH", "PASS", "COMPATIBLE"}
 AI = set(S.AI_GROUPS)
+REGION = set(S.REGION_SELECT_GROUPS)  # Claude, ChatGPT, GitHub, Google, TikTok — select + filter
 FORBIDDEN = {"url-test", "fallback", "load-balance", "random"}
 MAX_GROUPS = 10
 MODIFIERS = {"no-resolve", "dns-failed", "force-remote-dns", "extended-matching", "src"}
@@ -105,7 +106,7 @@ def validate_clash(text: str) -> None:
             fail(scope, "missing proxy-providers.airport")
         # AI groups must carry a regex filter (not hardcoded nodes)
         for g in data.get("proxy-groups", []):
-            if g["name"] in AI and "filter" not in g:
+            if g["name"] in REGION and "filter" not in g:
                 fail(scope, f"AI group {g['name']!r} has no regex filter")
     else:
         # yaml lib unavailable: lightweight structural parse
@@ -139,7 +140,7 @@ def validate_clash_merge(text: str) -> None:
     groups = {g["name"]: g["type"] for g in pg}
     _check_groups(scope, groups)
     for g in pg:
-        if g["name"] in AI and "filter" not in g:
+        if g["name"] in REGION and "filter" not in g:
             fail(scope, f"AI group {g['name']!r} has no regex filter")
     valid = set(groups) | BUILTINS
     for r in rules:
@@ -163,14 +164,14 @@ def _load_yaml(text: str):
 def _check_groups(scope: str, groups: dict[str, str]) -> None:
     if len(groups) > MAX_GROUPS:
         fail(scope, f"too many groups: {len(groups)} > {MAX_GROUPS}")
-    for g in AI:
+    for g in REGION:
         if g not in groups:
-            fail(scope, f"missing AI group {g!r}")
+            fail(scope, f"missing region group {g!r}")
         elif groups[g] != "select":
-            fail(scope, f"AI group {g!r} must be select, got {groups[g]!r}")
+            fail(scope, f"region group {g!r} must be select, got {groups[g]!r}")
     for name, t in groups.items():
-        if name in AI and t in FORBIDDEN:
-            fail(scope, f"AI group {name!r} uses forbidden type {t!r}")
+        if name in REGION and t in FORBIDDEN:
+            fail(scope, f"region group {name!r} uses forbidden type {t!r}")
 
 
 def _check_rules(scope: str, rules: list[str], valid: set[str], final_kw: str) -> None:

@@ -1,0 +1,17 @@
+# tiktok.list — TikTok (international)
+# Target group: TikTok  (Select-only; Japan / Taiwan / Singapore)
+# Format: one rule per line, TYPE,value  (NO trailing policy).
+# TikTok is region-sensitive; keep it on a stable JP/TW/SG exit.
+DOMAIN-SUFFIX,tiktok.com
+DOMAIN-SUFFIX,tiktokv.com
+DOMAIN-SUFFIX,tiktokcdn.com
+DOMAIN-SUFFIX,tiktokcdn-us.com
+DOMAIN-SUFFIX,tiktokv.us
+DOMAIN-SUFFIX,tiktokmusic.app
+DOMAIN-SUFFIX,byteoversea.com
+DOMAIN-SUFFIX,ibyteimg.com
+DOMAIN-SUFFIX,ibytedtos.com
+DOMAIN-SUFFIX,muscdn.com
+DOMAIN-SUFFIX,ttwstatic.com
+DOMAIN-SUFFIX,tik-tokapi.com
+DOMAIN-KEYWORD,tiktok

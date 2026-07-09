@@ -117,6 +117,7 @@ def build_clash() -> str:
             L.append(f"  - {r},{policy}")
     # 2. native GEOSITE/GEOIP tail (bundled with the core — no external URLs)
     L.append("  - GEOSITE,github,GitHub")
+    L.append("  - GEOSITE,tiktok,TikTok")
     L.append("  - GEOSITE,apple,DIRECT")
     L.append("  - GEOSITE,geolocation-cn,DIRECT")
     L.append("  - GEOIP,CN,DIRECT,no-resolve")
@@ -174,7 +175,7 @@ def build_clash_merge() -> str:
     whatever profile is active). Only AI/Apple/China are overridden; the airport's own
     rules + final policy still handle everything else. Coexists with a Global Script.
     """
-    wanted = ["Claude", "ChatGPT", "GitHub", "Google", "Proxy", "Apple"]
+    wanted = ["Claude", "ChatGPT", "GitHub", "Google", "TikTok", "Proxy", "Apple"]
     L: list[str] = []
     L.append("# ============================================================================")
     L.append("#  AI-Ultimate-Network — Clash Verge GLOBAL MERGE overlay. GENERATED — DO NOT EDIT.")
@@ -200,12 +201,14 @@ def build_clash_merge() -> str:
     merge_tiers = [
         ("anthropic.list", "Claude"), ("openai.list", "ChatGPT"),
         ("github.list", "GitHub"), ("google.list", "Google"),
-        ("apple.list", "Apple"), ("ai-extra.list", "Proxy"), ("china.list", "DIRECT"),
+        ("apple.list", "Apple"), ("tiktok.list", "TikTok"),
+        ("ai-extra.list", "Proxy"), ("china.list", "DIRECT"),
     ]
     for list_name, policy in merge_tiers:
         for r in S.read_list(list_name):
             L.append(f"  - {r},{policy}")
     L.append("  - GEOSITE,github,GitHub")
+    L.append("  - GEOSITE,tiktok,TikTok")
     L.append("  - GEOSITE,apple,DIRECT")
     L.append("  - GEOSITE,geolocation-cn,DIRECT")
     L.append("  - GEOIP,CN,DIRECT,no-resolve")
@@ -225,19 +228,21 @@ def build_clash_script() -> str:
     tiers = [
         ("anthropic.list", "Claude"), ("openai.list", "ChatGPT"),
         ("github.list", "GitHub"), ("google.list", "Google"),
-        ("apple.list", "Apple"), ("ai-extra.list", "Proxy"), ("china.list", "DIRECT"),
+        ("apple.list", "Apple"), ("tiktok.list", "TikTok"),
+        ("ai-extra.list", "Proxy"), ("china.list", "DIRECT"),
     ]
     rules: list[str] = []
     for list_name, policy in tiers:
         for r in S.read_list(list_name):
             rules.append(f"{r},{policy}")
-    rules += ["GEOSITE,github,GitHub", "GEOSITE,apple,DIRECT",
+    rules += ["GEOSITE,github,GitHub", "GEOSITE,tiktok,TikTok", "GEOSITE,apple,DIRECT",
               "GEOSITE,geolocation-cn,DIRECT", "GEOIP,CN,DIRECT,no-resolve"]
     rules_js = ",\n    ".join(json.dumps(r) for r in rules)
     f_claude = json.dumps(S.region_filter(["TW"]), ensure_ascii=False)
-    f_chatgpt = json.dumps(S.region_filter(["US", "SG"]), ensure_ascii=False)
-    f_github = json.dumps(S.region_filter(["US", "JP"]), ensure_ascii=False)
-    f_google = json.dumps(S.region_filter(["JP", "SG"]), ensure_ascii=False)
+    f_chatgpt = json.dumps(S.region_filter(["US", "SG", "JP", "HK"]), ensure_ascii=False)
+    f_github = json.dumps(S.region_filter(["HK"]), ensure_ascii=False)
+    f_google = json.dumps(S.region_filter(["HK", "JP", "SG", "US"]), ensure_ascii=False)
+    f_tiktok = json.dumps(S.region_filter(["JP", "TW", "SG"]), ensure_ascii=False)
     return f'''// ============================================================================
 // AI-Ultimate-Network — Clash Verge GLOBAL SCRIPT. GENERATED — DO NOT EDIT.
 // Rebuild: python3 scripts/build.py --target clash-script
@@ -260,6 +265,7 @@ function main(config) {{
     mk("ChatGPT", {f_chatgpt}),
     mk("GitHub", {f_github}),
     mk("Google", {f_google}),
+    mk("TikTok", {f_tiktok}),
     {{ name: "Proxy", type: "select", "include-all": true }},
     {{ name: "Apple", type: "select", proxies: ["DIRECT", "Proxy"] }}
   ];

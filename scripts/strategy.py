@@ -25,6 +25,7 @@ REGIONS: dict[str, list[str]] = {
     "US": [r"\bUS\b", "USA", "美国", "美國"],
     "SG": [r"\bSG\b", "Singapore", "新加坡", "狮城"],
     "JP": [r"\bJP\b", "Japan", "日本"],
+    "HK": [r"\bHK\b", "Hong ?Kong", "香港"],
 }
 
 
@@ -38,16 +39,22 @@ def region_filter(codes: list[str]) -> str:
 # kind: select | url-test ; regions: list[str] | "ALL" ; members: explicit policies.
 GROUPS: list[dict] = [
     {"name": "Claude",  "kind": "select",   "regions": ["TW"]},
-    {"name": "ChatGPT", "kind": "select",   "regions": ["US", "SG"]},
-    {"name": "GitHub",  "kind": "select",   "regions": ["US", "JP"]},
-    {"name": "Google",  "kind": "select",   "regions": ["JP", "SG"]},
+    # ChatGPT group covers all OpenAI incl. Codex (one group, per user request).
+    {"name": "ChatGPT", "kind": "select",   "regions": ["US", "SG", "JP", "HK"]},
+    {"name": "GitHub",  "kind": "select",   "regions": ["HK"]},
+    {"name": "Google",  "kind": "select",   "regions": ["HK", "JP", "SG", "US"]},
+    {"name": "TikTok",  "kind": "select",   "regions": ["JP", "TW", "SG"]},
     {"name": "Proxy",   "kind": "select",   "regions": "ALL"},
     {"name": "Auto",    "kind": "url-test", "regions": "ALL"},
     {"name": "Apple",   "kind": "select",   "members": ["DIRECT", "Proxy"]},
     {"name": "Final",   "kind": "select",   "members": ["Proxy", "DIRECT"]},
 ]
 
+# AI groups must stay Select-only (anti-ban). TikTok is a region-select group too.
 AI_GROUPS = ("Claude", "ChatGPT", "GitHub", "Google")
+REGION_SELECT_GROUPS = tuple(
+    g["name"] for g in GROUPS if g["kind"] == "select" and isinstance(g.get("regions"), list)
+)  # Claude, ChatGPT, GitHub, Google, TikTok
 HEALTH_URL = "http://www.gstatic.com/generate_204"
 
 # --- Local provider inlines, in canonical order. (file, target policy/group) -------
@@ -57,6 +64,7 @@ LOCAL_TIERS: list[tuple[str, str]] = [
     ("github.list",    "GitHub"),
     ("google.list",    "Google"),
     ("apple.list",     "Apple"),
+    ("tiktok.list",    "TikTok"),
     ("ai-extra.list",  "Proxy"),
     ("china.list",     "DIRECT"),
     ("proxy.list",     "Proxy"),

@@ -11,7 +11,7 @@ Stable region-pinned routing for AI services · zero-config node management via 
 ![Shadowrocket](https://img.shields.io/badge/Shadowrocket-stable-blue)
 ![Clash Verge](https://img.shields.io/badge/Clash%20Verge-beta-orange)
 ![Surge](https://img.shields.io/badge/Surge-beta-orange)
-![version](https://img.shields.io/badge/version-0.2.0-brightgreen)
+![version](https://img.shields.io/badge/version-0.3.0-brightgreen)
 
 </div>
 
@@ -27,8 +27,8 @@ ChatGPT wants a **stable US IP**, and auto-speed-testing keeps changing both out
 region, so:
 
 - 🟣 **Claude → Taiwan** (never url-tests, never fails over, never load-balances)
-- 🟢 **ChatGPT → US** (Singapore backup)
-- ⚫ **GitHub → US / Japan**, 🔵 **Google/Gemini → Japan / Singapore**
+- 🟢 **ChatGPT (incl. Codex) → US / SG / JP / HK** — one group
+- ⚫ **GitHub → HK**, 🔵 **Google/Gemini → HK / JP / SG / US**, 🎵 **TikTok → JP / TW / SG**
 - 🍎 **Apple → DIRECT** (App Store & iCloud always direct; Apple Intelligence toggleable)
 - 🌐 **Everything else → Proxy**, 🇨🇳 **China → DIRECT**
 
@@ -73,10 +73,11 @@ cross-client test guarantees they can't drift. Full per-client setup: **[`docs/U
 
 | Group | Type | Region regex | Default | Rationale |
 |---|---|---|---|---|
-| **Claude** | `select` | `TW / Taiwan / 台湾` | Taiwan | Anthropic needs a stable IP; ADR-0001 |
-| **ChatGPT** | `select` | `US / SG` | US | OpenAI region-gated; ADR-0002 |
-| **GitHub** | `select` | `US / JP` | US residential | Stability; ADR |
-| **Google** | `select` | `JP / SG` | Japan | Gemini/AI Studio; avoid HK; ADR |
+| **Claude** | `select` | `TW` | Taiwan | Anthropic needs a stable IP; ADR-0001 |
+| **ChatGPT** | `select` | `US / SG / JP / HK` | US | OpenAI incl. **Codex** — one group; ADR-0002/0008 |
+| **GitHub** | `select` | `HK` | HK | ADR-0008 |
+| **Google** | `select` | `HK / JP / SG / US` | HK | Gemini/AI Studio; ADR-0008 |
+| **TikTok** | `select` | `JP / TW / SG` | JP | Region-sensitive; ADR-0008 |
 | **Apple** | `select` | — | **DIRECT** | Apple Intelligence toggle; ADR-0003 |
 | **Proxy** | `select` | `.*` | any node | Generic foreign sites |
 | **Auto** | `url-test` | `.*` | lowest latency | Non-AI convenience only |

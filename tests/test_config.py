@@ -21,7 +21,7 @@ CLASH = ROOT / "config" / "AI-Ultimate.clash.yaml"
 SURGE = ROOT / "config" / "AI-Ultimate.surge.conf"
 BUILD = ROOT / "scripts" / "build.py"
 VALIDATE = ROOT / "scripts" / "validate.py"
-AI = set(S.AI_GROUPS)
+AI = set(S.REGION_SELECT_GROUPS)  # region-filtered select groups (incl. TikTok)
 
 
 def ini_section(text, name):
@@ -162,16 +162,15 @@ class TestCrossClientConsistency(unittest.TestCase):
         sr = ini_groups(SR.read_text(encoding="utf-8"))
         surge = ini_groups(SURGE.read_text(encoding="utf-8"))
         clash = CLASH.read_text(encoding="utf-8")
-        expected = {
-            "Claude": S.region_filter(["TW"]),
-            "ChatGPT": S.region_filter(["US", "SG"]),
-            "GitHub": S.region_filter(["US", "JP"]),
-            "Google": S.region_filter(["JP", "SG"]),
-        }
-        for g, regex in expected.items():
-            self.assertIn(regex, sr[g], f"SR {g}")
-            self.assertIn(regex, surge[g], f"Surge {g}")
-            self.assertIn(regex, clash, f"Clash {g}")
+        # Derive expected filters straight from strategy so the test auto-covers
+        # every region group (Claude/ChatGPT/GitHub/Google/TikTok) and any changes.
+        for g in S.GROUPS:
+            if g["kind"] == "select" and isinstance(g.get("regions"), list):
+                regex = S.region_filter(g["regions"])
+                name = g["name"]
+                self.assertIn(regex, sr[name], f"SR {name}")
+                self.assertIn(regex, surge[name], f"Surge {name}")
+                self.assertIn(regex, clash, f"Clash {name}")
 
     def test_same_group_set_everywhere(self):
         want = {g["name"] for g in S.GROUPS}
