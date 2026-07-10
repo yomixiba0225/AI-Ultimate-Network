@@ -30,7 +30,7 @@ Semantic Versioning. Dates are targets, not commitments.
 
 - Expand Anthropic/OpenAI domain coverage (assets/CDN) from observed traffic.
 - Optional **dns-over-proxy** profile enabled + validated for AI domains (currently commented).
-- `ipv6=false` A/B evaluation for AI-endpoint stability.
+- Monitor the Shadowrocket `ipv6=false` stability default; document opt-in for verified IPv6 paths.
 - Optional dedicated groups for Perplexity / Grok if usage justifies (still ≤10).
 
 ## v0.5.0 — Provider hygiene

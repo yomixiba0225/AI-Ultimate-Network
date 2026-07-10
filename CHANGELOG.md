@@ -4,6 +4,14 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **Shadowrocket TUN: WeChat could stall at “获取消息中”.** Shadowrocket now defaults to
+  `ipv6=false`, avoiding unstable carrier/router IPv6 paths while keeping WeChat `DIRECT`.
+- Replaced the accepted-but-cross-client Quantumult X WeChat source with the native Shadowrocket
+  rule-set so the provider syntax matches the consuming client.
+
 ## [0.3.0] - 2026-07-08
 
 Strategy rebalance (user request). Region assignments changed and a new group added; still

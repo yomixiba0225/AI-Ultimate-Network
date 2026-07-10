@@ -81,7 +81,7 @@ name auto-matches Claude in principle (regex verified); US does not match AUS.
 - `scripts/validate.py` (9 checks incl. FINAL-last, dangling refs, canonical order).
 - `tests/test_config.py` (13 stdlib unittest cases).
 - `.github/workflows/validate.yml` (build → freshness → validate → tests).
-- Optional DNS-over-proxy + `ipv6` notes (commented, P2) in template.
+- Optional DNS-over-proxy notes plus the IPv6 stability default in the Shadowrocket template.
 
 **Dependencies** — M3, M4.
 
