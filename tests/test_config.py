@@ -176,6 +176,29 @@ class TestClashGlobalScript(unittest.TestCase):
         self.assertLess(idx_wechat, idx_claude)
 
 
+class TestClashScriptAdobeFused(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.text = (ROOT / "config" / "AI-Ultimate.clash-script-adobe.js").read_text(encoding="utf-8")
+
+    def test_single_main_single_return(self):
+        # the exact paste mistakes that killed the user's groups: nested main / dead code
+        self.assertEqual(self.text.count("function main"), 1)
+        self.assertEqual(self.text.count("return config"), 1)
+
+    def test_no_invisible_characters(self):
+        import unicodedata
+        bad = [c for c in self.text if unicodedata.category(c) == "Cf"]
+        self.assertEqual(bad, [])
+
+    def test_contains_adobe_and_ai_blocks(self):
+        self.assertIn('"adobe-block"', self.text)
+        self.assertIn("RULE-SET,adobe-block,REJECT", self.text)
+        self.assertIn("PROCESS-NAME,WeChat,DIRECT", self.text)
+        self.assertIn('"+.weixin.qq.com"', self.text)
+        self.assertIn("AI-Ultimate-Network BEGIN", self.text)
+
+
 class TestCrossClientConsistency(unittest.TestCase):
     """The AI region strategy must be identical across all three clients."""
 

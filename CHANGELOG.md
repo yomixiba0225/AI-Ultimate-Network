@@ -4,6 +4,18 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-07-10
+
+### Added
+- **Fused Global Script** `config/AI-Ultimate.clash-script-adobe.js` (`build.py --target
+  clash-script-adobe`): the Adobe-telemetry REJECT block + the complete AI-Ultimate block in one
+  ready-to-paste `main()`. Spliced at build time from the plain script's BEGIN..END section, so
+  the two variants cannot drift. Born from a real incident: hand-splicing the block into an
+  existing script via a Markdown editor produced a nested `main()` **and** 114 invisible
+  zero-width spaces (U+200B) — the whole script became a silent SyntaxError and every group
+  (including the Adobe block) stopped applying. New tests assert: exactly one `main`/`return`,
+  zero format-category characters, both blocks present.
+
 ## [0.3.1] - 2026-07-10
 
 ### Fixed
@@ -155,6 +167,7 @@ validated configuration project.
   `skip-proxy`, `hijack-dns`, `block-quic=all-proxy`. Original baseline kept at
   `config/lazy.conf` for reference and rollback.
 
+[0.3.2]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.2
 [0.3.1]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.1
 [0.3.0]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.0
 [0.2.4]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.4

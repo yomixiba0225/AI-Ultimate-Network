@@ -30,6 +30,7 @@ OUT = {
     "clash": ROOT / "config" / "AI-Ultimate.clash.yaml",
     "clash-merge": ROOT / "config" / "AI-Ultimate.clash-merge.yaml",
     "clash-script": ROOT / "config" / "AI-Ultimate.clash-script.js",
+    "clash-script-adobe": ROOT / "config" / "AI-Ultimate.clash-script-adobe.js",
     "surge": ROOT / "config" / "AI-Ultimate.surge.conf",
 }
 INCLUDE = "#!INCLUDE"
@@ -350,11 +351,52 @@ function main(config) {{
 '''
 
 
+# --------------------------------------- Clash Verge Global Script + Adobe block ---
+def build_clash_script_adobe() -> str:
+    """
+    'Fused' Global Script: the owner's Adobe-telemetry block + the full AI-Ultimate
+    block in ONE main(). Spliced from build_clash_script()'s BEGIN..END section so
+    the two script variants can never drift. Paste this WHOLE file into Clash Verge
+    设置 → 全局扩展脚本 — full-select replace, nothing else needed.
+    """
+    base = build_clash_script()
+    begin = base.index("  // ===== AI-Ultimate-Network BEGIN =====")
+    end = base.index("  // ===== AI-Ultimate-Network END =====") \
+        + len("  // ===== AI-Ultimate-Network END =====")
+    ai_block = base[begin:end]
+    return f'''// ============================================================================
+// AI-Ultimate-Network — Clash Verge GLOBAL SCRIPT (Adobe + AI fused). GENERATED.
+// Rebuild: python3 scripts/build.py --target clash-script-adobe
+//
+// ONE main(): Adobe telemetry block (RULE-SET -> REJECT) + the complete
+// AI-Ultimate block (WeChat-safe DNS, IM process rules, 5 strategy groups).
+// Paste this ENTIRE file into Clash Verge: 设置 → 全局扩展脚本 (full replace).
+// Copy from the raw file only — never via Markdown editors/IM apps, they inject
+// invisible zero-width characters that break JS parsing (learned the hard way).
+// ============================================================================
+function main(config) {{
+  // ===== Adobe block =====
+  config["rule-providers"] = config["rule-providers"] || {{}};
+  config["rule-providers"]["adobe-block"] = {{
+    type: "http", behavior: "classical", format: "yaml",
+    url: "https://fastly.jsdelivr.net/gh/ignaciocastro/a-dove-is-dumb@latest/clash.yaml",
+    path: "./ruleset/adobe-block.yaml", interval: 86400
+  }};
+  config.rules = config.rules || [];
+  config.rules.unshift("RULE-SET,adobe-block,REJECT");
+
+{ai_block}
+  return config;
+}}
+'''
+
+
 BUILDERS = {
     "shadowrocket": build_shadowrocket,
     "clash": build_clash,
     "clash-merge": build_clash_merge,
     "clash-script": build_clash_script,
+    "clash-script-adobe": build_clash_script_adobe,
     "surge": build_surge,
 }
 

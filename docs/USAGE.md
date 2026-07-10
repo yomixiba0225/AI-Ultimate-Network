@@ -43,6 +43,15 @@ New nodes auto-join the matching group — no edits. Update: swipe the config �
 
 Two ways. **If you have multiple subscriptions, use 2A (Global Merge)** — it's the whole point.
 
+### 2A-Fused. Adobe block + AI in one file ✅ zero-assembly
+
+If you use the Adobe-telemetry block, take `config/AI-Ultimate.clash-script-adobe.js` — the
+whole file is one ready `main()` (Adobe REJECT + WeChat-safe DNS + IM process rules + all
+groups). **Full-select replace** your Global Script with it; nothing to splice.
+
+> ⚠️ Copy it from the raw GitHub file or a code editor ONLY. Markdown editors / IM apps inject
+> invisible zero-width characters (U+200B) that make the whole script a silent SyntaxError.
+
 ### 2A-Script. Multiple subscriptions + you already use a Global Script ✅ most reliable
 
 If a **Global Script** (脚本) is present (e.g. an Adobe block), it runs **after** the Merge and

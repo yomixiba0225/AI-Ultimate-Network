@@ -11,7 +11,7 @@ Stable region-pinned routing for AI services · zero-config node management via 
 ![Shadowrocket](https://img.shields.io/badge/Shadowrocket-stable-blue)
 ![Clash Verge](https://img.shields.io/badge/Clash%20Verge-beta-orange)
 ![Surge](https://img.shields.io/badge/Surge-beta-orange)
-![version](https://img.shields.io/badge/version-0.3.1-brightgreen)
+![version](https://img.shields.io/badge/version-0.3.2-brightgreen)
 
 </div>
 
