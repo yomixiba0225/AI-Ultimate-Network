@@ -4,6 +4,20 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2026-07-10
+
+### Fixed
+- **WeChat "收取中" root cause #2, confirmed by live debugging: Tencent IPv6 blackhole.**
+  With the v0.3.1 DNS fix live (verified: groups present, weixin domains resolving to real
+  IPv4), WeChat still stalled. The mihomo connections API showed WeChat dialing
+  `2408:80f1::/32` (Unicom-Tencent) IPv6 endpoints DIRECT with 43B up / 0B down — half-open
+  connections retried every few seconds. WeChat obtains v6 addresses from its own in-band
+  server lists, bypassing DNS entirely, and the Clash Verge **IPv6 UI toggle** routed them
+  into TUN. Fixes: `IP-CIDR,2408:80f1::/32,REJECT,no-resolve` placed **before** the IM
+  process rules (instant RST → millisecond IPv4 fallback instead of minutes of timeouts),
+  plus a `tun.ipv6=false` belt in the Global Script. **Users must also switch OFF the Verge
+  设置 → IPv6 toggle** — it is applied after enhance scripts and wins.
+
 ## [0.3.2] - 2026-07-10
 
 ### Added
@@ -167,6 +181,7 @@ validated configuration project.
   `skip-proxy`, `hijack-dns`, `block-quic=all-proxy`. Original baseline kept at
   `config/lazy.conf` for reference and rollback.
 
+[0.3.3]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.3
 [0.3.2]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.2
 [0.3.1]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.1
 [0.3.0]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.0

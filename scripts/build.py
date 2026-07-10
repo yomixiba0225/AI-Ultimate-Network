@@ -136,7 +136,8 @@ def build_clash() -> str:
                 L.append(f"    proxies: [Proxy]")   # break the whole config (Mihomo rejects empty groups)
     L.append("")
     L.append("rules:")
-    # 0. IM first (TUN process matching): WeChat & friends bypass everything, instantly.
+    # 0. Tencent-IPv6 blackhole guard + IM-first (see ADR-0009 / live debug 2026-07-10)
+    L.append("  - IP-CIDR,2408:80f1::/32,REJECT,no-resolve")
     for r in ["PROCESS-NAME,WeChat,DIRECT", "PROCESS-NAME,QQ,DIRECT",
               "PROCESS-NAME,DingTalk,DIRECT", "PROCESS-NAME,Lark,DIRECT",
               "DOMAIN-SUFFIX,weixin.qq.com,DIRECT", "DOMAIN-SUFFIX,wechat.com,DIRECT",
@@ -264,6 +265,12 @@ def build_clash_script() -> str:
         ("ai-extra.list", "Proxy"), ("china.list", "DIRECT"),
     ]
     rules: list[str] = []
+    # Tencent IPv6 first (BEFORE the process rules, or their DIRECT would win):
+    # live-debug 2026-07-10 showed WeChat dialing 2408:80f1::/32 v6 endpoints that
+    # blackhole (43B up / 0B down, endless retries = the 收取中 spinner). REJECT
+    # returns an instant RST so WeChat falls back to IPv4 in milliseconds instead
+    # of timing out for minutes. Harmless when native v6 is healthy or absent.
+    rules += ["IP-CIDR,2408:80f1::/32,REJECT,no-resolve"]
     # IM first: under TUN, mihomo matches by process — the entire WeChat/QQ/DingTalk/
     # Feishu process goes DIRECT instantly, no DNS or GEOIP lookup involved.
     rules += ["PROCESS-NAME,WeChat,DIRECT", "PROCESS-NAME,QQ,DIRECT",
@@ -299,6 +306,9 @@ function main(config) {{
   // Base subscriptions may enable IPv6 even though the standalone profile does not.
   // Disable both kernel IPv6 handling and AAAA answers to avoid TUN direct-path stalls.
   config["ipv6"] = false;
+  // Belt: if the tun section is visible at enhance time, drop its v6 too. The Verge
+  // UI "IPv6" toggle must ALSO be off — it is applied after scripts and wins.
+  if (config["tun"]) config["tun"]["ipv6"] = false;
   // --- DNS: deterministic, WeChat-safe (see docs/adr/ADR-0009-wechat-tun-dns.md) ---
   // Root cause of "WeChat stuck at 收取中 for minutes under TUN": fake-ip answers for
   // IM domains break WeChat's own connection logic. Fix = own the dns section:

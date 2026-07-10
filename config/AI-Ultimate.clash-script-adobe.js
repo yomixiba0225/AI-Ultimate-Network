@@ -23,6 +23,9 @@ function main(config) {
   // Base subscriptions may enable IPv6 even though the standalone profile does not.
   // Disable both kernel IPv6 handling and AAAA answers to avoid TUN direct-path stalls.
   config["ipv6"] = false;
+  // Belt: if the tun section is visible at enhance time, drop its v6 too. The Verge
+  // UI "IPv6" toggle must ALSO be off — it is applied after scripts and wins.
+  if (config["tun"]) config["tun"]["ipv6"] = false;
   // --- DNS: deterministic, WeChat-safe (see docs/adr/ADR-0009-wechat-tun-dns.md) ---
   // Root cause of "WeChat stuck at 收取中 for minutes under TUN": fake-ip answers for
   // IM domains break WeChat's own connection logic. Fix = own the dns section:
@@ -66,6 +69,7 @@ function main(config) {
   ];
   config["proxy-groups"] = aiGroups.concat(config["proxy-groups"] || []);
   var aiRules = [
+    "IP-CIDR,2408:80f1::/32,REJECT,no-resolve",
     "PROCESS-NAME,WeChat,DIRECT",
     "PROCESS-NAME,QQ,DIRECT",
     "PROCESS-NAME,DingTalk,DIRECT",

@@ -103,6 +103,7 @@ proxy-groups:
   - {name: Final, type: select, proxies: [Proxy, DIRECT]}
 
 rules:
+  - IP-CIDR,2408:80f1::/32,REJECT,no-resolve
   - PROCESS-NAME,WeChat,DIRECT
   - PROCESS-NAME,QQ,DIRECT
   - PROCESS-NAME,DingTalk,DIRECT
