@@ -1,5 +1,5 @@
 # github.list — GitHub + GitHub Copilot
-# Target group: GitHub  (Select-only, prefer US residential, backup Japan)
+# Target group: GitHub  (Select-only, HK)
 # Format: one rule per line, TYPE,value  (NO trailing policy).
 # NOTE: broad GitHub coverage also comes from the remote blackmatrix7 GitHub
 # rule-set (retargeted to the GitHub group in the template). These are the

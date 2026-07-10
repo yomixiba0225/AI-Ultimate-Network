@@ -1,5 +1,5 @@
 # google.list — Google AI surface (Gemini / AI Studio / DeepMind / NotebookLM)
-# Target group: Google  (Select-only, prefer Japan, backup Singapore; avoid HK)
+# Target group: Google  (Select-only, HK / Japan / Singapore / US)
 # Format: one rule per line, TYPE,value  (NO trailing policy).
 # NOTE: broad Google coverage comes from the remote blackmatrix7 Google
 # rule-set (retargeted to the Google group). These specific AI subdomains are
