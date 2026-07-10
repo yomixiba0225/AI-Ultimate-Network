@@ -15,8 +15,35 @@ function main(config) {
   // Base subscriptions may enable IPv6 even though the standalone profile does not.
   // Disable both kernel IPv6 handling and AAAA answers to avoid TUN direct-path stalls.
   config["ipv6"] = false;
-  config["dns"] = config["dns"] || {};
-  config["dns"]["ipv6"] = false;
+  // --- DNS: deterministic, WeChat-safe (see docs/adr/ADR-0009-wechat-tun-dns.md) ---
+  // Root cause of "WeChat stuck at 收取中 for minutes under TUN": fake-ip answers for
+  // IM domains break WeChat's own connection logic. Fix = own the dns section:
+  // fake-ip mode BUT with IM/NTP/STUN domains excluded (fake-ip-filter), domestic DoH
+  // for CN names, foreign fallback for the rest. Verge's "DNS 覆写" toggle can stay OFF.
+  config["dns"] = {
+    enable: true,
+    ipv6: false,
+    "enhanced-mode": "fake-ip",
+    "fake-ip-range": "198.18.0.1/16",
+    "fake-ip-filter": [
+      "*.lan", "*.local", "*.localdomain",
+      "+.msftconnecttest.com", "+.msftncsi.com",
+      "+.stun.*.*", "+.stun.*.*.*",
+      "time.*.com", "time.*.apple.com", "ntp.*.com", "+.pool.ntp.org",
+      // IM — WeChat/QQ/DingTalk/Feishu must get REAL IPs or they stall under TUN:
+      "+.qq.com", "+.weixin.qq.com", "+.wechat.com", "+.weixinbridge.com",
+      "+.wechatapp.com", "+.qpic.cn", "+.qlogo.cn", "+.gtimg.cn", "+.tencent.com",
+      "+.dingtalk.com", "+.feishu.cn", "+.larksuite.com",
+      "+.163.com", "+.126.net", "+.netease.com"
+    ],
+    "default-nameserver": ["223.5.5.5", "119.29.29.29"],
+    nameserver: ["https://doh.pub/dns-query", "https://dns.alidns.com/dns-query"],
+    "nameserver-policy": {
+      "geosite:cn": ["https://doh.pub/dns-query", "https://dns.alidns.com/dns-query"]
+    },
+    fallback: ["https://dns.google/dns-query", "https://cloudflare-dns.com/dns-query"],
+    "fallback-filter": { geoip: true, "geoip-code": "CN", ipcidr: ["240.0.0.0/4"] }
+  };
   var mk = function (name, filter) {
     return { name: name, type: "select", "include-all": true, filter: filter, proxies: ["Proxy"] };
   };
@@ -31,6 +58,15 @@ function main(config) {
   ];
   config["proxy-groups"] = aiGroups.concat(config["proxy-groups"] || []);
   var aiRules = [
+    "PROCESS-NAME,WeChat,DIRECT",
+    "PROCESS-NAME,QQ,DIRECT",
+    "PROCESS-NAME,DingTalk,DIRECT",
+    "PROCESS-NAME,Lark,DIRECT",
+    "DOMAIN-SUFFIX,weixin.qq.com,DIRECT",
+    "DOMAIN-SUFFIX,wechat.com,DIRECT",
+    "DOMAIN-SUFFIX,qq.com,DIRECT",
+    "DOMAIN-SUFFIX,qpic.cn,DIRECT",
+    "DOMAIN-SUFFIX,qlogo.cn,DIRECT",
     "DOMAIN-SUFFIX,claude.ai,Claude",
     "DOMAIN-SUFFIX,anthropic.com,Claude",
     "DOMAIN-SUFFIX,claude.com,Claude",

@@ -158,7 +158,22 @@ class TestClashGlobalScript(unittest.TestCase):
 
     def test_disables_kernel_and_dns_ipv6(self):
         self.assertIn('config["ipv6"] = false;', self.text)
-        self.assertIn('config["dns"]["ipv6"] = false;', self.text)
+        # dns block owns ipv6: false (supersedes the old config["dns"]["ipv6"] line)
+        self.assertRegex(self.text, r'config\["dns"\] = \{\s*\n\s*enable: true,\s*\n\s*ipv6: false')
+
+    def test_wechat_safe_dns(self):
+        # ADR-0009: IM domains must be excluded from fake-ip or WeChat stalls under TUN
+        self.assertIn('"fake-ip-filter"', self.text)
+        for pat in ('"+.weixin.qq.com"', '"+.wechat.com"', '"+.qq.com"',
+                    '"+.dingtalk.com"', '"+.feishu.cn"'):
+            self.assertIn(pat, self.text)
+        self.assertIn('"enhanced-mode": "fake-ip"', self.text)
+
+    def test_im_process_rules_first(self):
+        # WeChat process bypasses everything under TUN, before any AI rule
+        idx_wechat = self.text.index("PROCESS-NAME,WeChat,DIRECT")
+        idx_claude = self.text.index("DOMAIN-SUFFIX,claude.ai,Claude")
+        self.assertLess(idx_wechat, idx_claude)
 
 
 class TestCrossClientConsistency(unittest.TestCase):

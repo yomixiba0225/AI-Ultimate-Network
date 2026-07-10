@@ -77,6 +77,30 @@ def build_clash() -> str:
     L.append("log-level: info")
     L.append("ipv6: false")
     L.append("")
+    L.append("# WeChat-safe DNS for TUN (ADR-0009): fake-ip, but IM/NTP/STUN domains get")
+    L.append("# real IPs via fake-ip-filter; CN names use domestic DoH; rest falls back.")
+    L.append("dns:")
+    L.append("  enable: true")
+    L.append("  ipv6: false")
+    L.append("  enhanced-mode: fake-ip")
+    L.append("  fake-ip-range: 198.18.0.1/16")
+    L.append("  fake-ip-filter:")
+    for pat in ["*.lan", "*.local", "*.localdomain",
+                "+.msftconnecttest.com", "+.msftncsi.com",
+                "+.stun.*.*", "+.stun.*.*.*",
+                "time.*.com", "time.*.apple.com", "ntp.*.com", "+.pool.ntp.org",
+                "+.qq.com", "+.weixin.qq.com", "+.wechat.com", "+.weixinbridge.com",
+                "+.wechatapp.com", "+.qpic.cn", "+.qlogo.cn", "+.gtimg.cn", "+.tencent.com",
+                "+.dingtalk.com", "+.feishu.cn", "+.larksuite.com",
+                "+.163.com", "+.126.net", "+.netease.com"]:
+        L.append(f"    - '{pat}'")
+    L.append("  default-nameserver: [223.5.5.5, 119.29.29.29]")
+    L.append("  nameserver: [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]")
+    L.append("  nameserver-policy:")
+    L.append("    'geosite:cn': [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]")
+    L.append("  fallback: [https://dns.google/dns-query, https://cloudflare-dns.com/dns-query]")
+    L.append("  fallback-filter: {geoip: true, geoip-code: CN, ipcidr: [240.0.0.0/4]}")
+    L.append("")
     L.append("proxy-providers:")
     L.append("  airport:")
     L.append("    type: http")
@@ -111,6 +135,13 @@ def build_clash() -> str:
                 L.append(f"    proxies: [Proxy]")   # break the whole config (Mihomo rejects empty groups)
     L.append("")
     L.append("rules:")
+    # 0. IM first (TUN process matching): WeChat & friends bypass everything, instantly.
+    for r in ["PROCESS-NAME,WeChat,DIRECT", "PROCESS-NAME,QQ,DIRECT",
+              "PROCESS-NAME,DingTalk,DIRECT", "PROCESS-NAME,Lark,DIRECT",
+              "DOMAIN-SUFFIX,weixin.qq.com,DIRECT", "DOMAIN-SUFFIX,wechat.com,DIRECT",
+              "DOMAIN-SUFFIX,qq.com,DIRECT", "DOMAIN-SUFFIX,qpic.cn,DIRECT",
+              "DOMAIN-SUFFIX,qlogo.cn,DIRECT"]:
+        L.append(f"  - {r}")
     # 1. local provider inlines (precise AI routing), canonical order
     for list_name, policy in S.LOCAL_TIERS:
         for r in S.read_list(list_name):
@@ -232,6 +263,13 @@ def build_clash_script() -> str:
         ("ai-extra.list", "Proxy"), ("china.list", "DIRECT"),
     ]
     rules: list[str] = []
+    # IM first: under TUN, mihomo matches by process — the entire WeChat/QQ/DingTalk/
+    # Feishu process goes DIRECT instantly, no DNS or GEOIP lookup involved.
+    rules += ["PROCESS-NAME,WeChat,DIRECT", "PROCESS-NAME,QQ,DIRECT",
+              "PROCESS-NAME,DingTalk,DIRECT", "PROCESS-NAME,Lark,DIRECT",
+              "DOMAIN-SUFFIX,weixin.qq.com,DIRECT", "DOMAIN-SUFFIX,wechat.com,DIRECT",
+              "DOMAIN-SUFFIX,qq.com,DIRECT", "DOMAIN-SUFFIX,qpic.cn,DIRECT",
+              "DOMAIN-SUFFIX,qlogo.cn,DIRECT"]
     for list_name, policy in tiers:
         for r in S.read_list(list_name):
             rules.append(f"{r},{policy}")
@@ -260,8 +298,35 @@ function main(config) {{
   // Base subscriptions may enable IPv6 even though the standalone profile does not.
   // Disable both kernel IPv6 handling and AAAA answers to avoid TUN direct-path stalls.
   config["ipv6"] = false;
-  config["dns"] = config["dns"] || {{}};
-  config["dns"]["ipv6"] = false;
+  // --- DNS: deterministic, WeChat-safe (see docs/adr/ADR-0009-wechat-tun-dns.md) ---
+  // Root cause of "WeChat stuck at 收取中 for minutes under TUN": fake-ip answers for
+  // IM domains break WeChat's own connection logic. Fix = own the dns section:
+  // fake-ip mode BUT with IM/NTP/STUN domains excluded (fake-ip-filter), domestic DoH
+  // for CN names, foreign fallback for the rest. Verge's "DNS 覆写" toggle can stay OFF.
+  config["dns"] = {{
+    enable: true,
+    ipv6: false,
+    "enhanced-mode": "fake-ip",
+    "fake-ip-range": "198.18.0.1/16",
+    "fake-ip-filter": [
+      "*.lan", "*.local", "*.localdomain",
+      "+.msftconnecttest.com", "+.msftncsi.com",
+      "+.stun.*.*", "+.stun.*.*.*",
+      "time.*.com", "time.*.apple.com", "ntp.*.com", "+.pool.ntp.org",
+      // IM — WeChat/QQ/DingTalk/Feishu must get REAL IPs or they stall under TUN:
+      "+.qq.com", "+.weixin.qq.com", "+.wechat.com", "+.weixinbridge.com",
+      "+.wechatapp.com", "+.qpic.cn", "+.qlogo.cn", "+.gtimg.cn", "+.tencent.com",
+      "+.dingtalk.com", "+.feishu.cn", "+.larksuite.com",
+      "+.163.com", "+.126.net", "+.netease.com"
+    ],
+    "default-nameserver": ["223.5.5.5", "119.29.29.29"],
+    nameserver: ["https://doh.pub/dns-query", "https://dns.alidns.com/dns-query"],
+    "nameserver-policy": {{
+      "geosite:cn": ["https://doh.pub/dns-query", "https://dns.alidns.com/dns-query"]
+    }},
+    fallback: ["https://dns.google/dns-query", "https://cloudflare-dns.com/dns-query"],
+    "fallback-filter": {{ geoip: true, "geoip-code": "CN", ipcidr: ["240.0.0.0/4"] }}
+  }};
   var mk = function (name, filter) {{
     return {{ name: name, type: "select", "include-all": true, filter: filter, proxies: ["Proxy"] }};
   }};

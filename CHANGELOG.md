@@ -4,13 +4,27 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.1] - 2026-07-10
 
 ### Fixed
-- **Clash Verge Global Script: WeChat could stall at “获取消息中” under TUN.** The standalone
-  Clash profile disabled IPv6, but the Global Script left the active subscription's
-  `ipv6: true` and `dns.ipv6: true` untouched. The script now forces both values to `false`,
-  preventing repeated direct IPv6 timeouts while retaining the existing WeChat `DIRECT` rules.
+- **WeChat stalled at "收取中" for 3–5 min under Clash Verge TUN — root-cause fix
+  (ADR-0009).** The earlier IPv6-only mitigation was insufficient. The real cause: fake-ip DNS
+  answers for IM domains break WeChat's own connection stack, and the airport subscription's
+  unmanaged `dns:` section (Verge "DNS 覆写" off) had no `fake-ip-filter`. Both Clash
+  deliverables (`AI-Ultimate.clash.yaml`, `AI-Ultimate.clash-script.js`) now **own the DNS
+  section**: fake-ip mode with IM/NTP/STUN excluded via `fake-ip-filter`
+  (qq/weixin/wechat/qpic/qlogo/tencent, dingtalk, feishu, larksuite, netease), domestic DoH +
+  `geosite:cn` policy, geoip-gated foreign fallback, `ipv6: false` throughout.
+- **IM-first rule tier:** `PROCESS-NAME WeChat/QQ/DingTalk/Lark → DIRECT` before all other
+  rules (TUN process matching bypasses DNS/GEOIP entirely), plus explicit
+  weixin.qq.com/wechat.com/qq.com/qpic.cn/qlogo.cn DOMAIN-SUFFIX → DIRECT for non-TUN modes.
+  Documented deviation above the canonical AI tier (app-scoped; cannot collide with AI domains).
+- Global Script verified by simulation to override a hostile/absent airport dns section; new
+  tests cover fake-ip-filter contents, dns ipv6, and IM-rules-before-AI ordering (21 tests).
+
+### Kept (from the interim mitigation)
+- Shadowrocket `ipv6 = false` and the Shadowrocket-native WeChat rule-set path; Global Script
+  `config.ipv6 = false`.
 
 ## [0.3.0] - 2026-07-08
 
@@ -141,6 +155,7 @@ validated configuration project.
   `skip-proxy`, `hijack-dns`, `block-quic=all-proxy`. Original baseline kept at
   `config/lazy.conf` for reference and rollback.
 
+[0.3.1]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.1
 [0.3.0]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.0
 [0.2.4]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.4
 [0.2.3]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.2.3
