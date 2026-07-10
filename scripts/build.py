@@ -138,6 +138,7 @@ def build_clash() -> str:
     L.append("rules:")
     # 0. Tencent-IPv6 blackhole guard + IM-first (see ADR-0009 / live debug 2026-07-10)
     L.append("  - IP-CIDR,2408:80f1::/32,REJECT,no-resolve")
+    L.append("  - IP-CIDR,2408:8722::/32,REJECT,no-resolve")
     for r in ["PROCESS-NAME,WeChat,DIRECT", "PROCESS-NAME,QQ,DIRECT",
               "PROCESS-NAME,DingTalk,DIRECT", "PROCESS-NAME,Lark,DIRECT",
               "DOMAIN-SUFFIX,weixin.qq.com,DIRECT", "DOMAIN-SUFFIX,wechat.com,DIRECT",
@@ -270,7 +271,8 @@ def build_clash_script() -> str:
     # blackhole (43B up / 0B down, endless retries = the 收取中 spinner). REJECT
     # returns an instant RST so WeChat falls back to IPv4 in milliseconds instead
     # of timing out for minutes. Harmless when native v6 is healthy or absent.
-    rules += ["IP-CIDR,2408:80f1::/32,REJECT,no-resolve"]
+    rules += ["IP-CIDR,2408:80f1::/32,REJECT,no-resolve",
+              "IP-CIDR,2408:8722::/32,REJECT,no-resolve"]  # 2nd Tencent v6 range, seen 2026-07-10
     # IM first: under TUN, mihomo matches by process — the entire WeChat/QQ/DingTalk/
     # Feishu process goes DIRECT instantly, no DNS or GEOIP lookup involved.
     rules += ["PROCESS-NAME,WeChat,DIRECT", "PROCESS-NAME,QQ,DIRECT",

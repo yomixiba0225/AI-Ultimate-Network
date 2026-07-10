@@ -4,6 +4,14 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.4] - 2026-07-10
+
+### Fixed
+- Reject the second observed Tencent IPv6 range `2408:8722::/32` as well (live connections
+  still showed WeChat half-open v6 dials there via ProcessName DIRECT on pre-v0.3.3 scripts).
+  Reminder: the Verge 设置 → IPv6 toggle must be OFF — TUN source `fdfe:...` in connections
+  means it is still on.
+
 ## [0.3.3] - 2026-07-10
 
 ### Fixed
@@ -181,6 +189,7 @@ validated configuration project.
   `skip-proxy`, `hijack-dns`, `block-quic=all-proxy`. Original baseline kept at
   `config/lazy.conf` for reference and rollback.
 
+[0.3.4]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.4
 [0.3.3]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.3
 [0.3.2]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.2
 [0.3.1]: https://github.com/yomixiba0225/AI-Ultimate-Network/releases/tag/v0.3.1

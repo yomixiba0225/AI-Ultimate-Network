@@ -70,6 +70,7 @@ function main(config) {
   config["proxy-groups"] = aiGroups.concat(config["proxy-groups"] || []);
   var aiRules = [
     "IP-CIDR,2408:80f1::/32,REJECT,no-resolve",
+    "IP-CIDR,2408:8722::/32,REJECT,no-resolve",
     "PROCESS-NAME,WeChat,DIRECT",
     "PROCESS-NAME,QQ,DIRECT",
     "PROCESS-NAME,DingTalk,DIRECT",
