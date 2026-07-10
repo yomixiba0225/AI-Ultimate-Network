@@ -4,6 +4,13 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.5] - 2026-07-10
+
+### Fixed
+- Sync rule file header comments with v0.3.0 region strategy: `google.list` (removed stale
+  "avoid HK" — HK is now primary), `github.list` (removed stale "US/JP" — now HK-only),
+  template section comment for GitHub group.
+
 ## [0.3.4] - 2026-07-10
 
 ### Fixed
