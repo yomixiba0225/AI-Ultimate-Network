@@ -57,6 +57,10 @@ the Script instead. Use `config/AI-Ultimate.clash-script.js`.
 4. **订阅** page → click your profile card to regenerate. **代理** page now shows
    `Claude / ChatGPT / GitHub / Google / Proxy / Apple` + your original group.
 
+The script also forces both top-level `ipv6` and `dns.ipv6` to `false`. This is intentional:
+some macOS TUN paths accept IPv6 but time out on direct Chinese endpoints, which can leave WeChat
+stuck at “获取消息中”. Replace the AI block and regenerate the profile after upgrading.
+
 Why it's reliable: the script builds groups with `include-all: true` + region `filter`, so they
 pull nodes from the active subscription **and** any airport you fuse in via `proxy-providers`.
 A region with no node falls back to `Proxy` (never DIRECT), so an empty region can't break the

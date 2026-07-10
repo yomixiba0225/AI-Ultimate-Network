@@ -214,8 +214,8 @@ manually switch to any other TW node (ToLink TW backups) — all **Select**, nev
   ```
 - Keep `fallback-dns-server = system`, `private-ip-answer = true`, `dns-direct-fallback-proxy =
   true`, `block-quic = all-proxy`, `[Host]` Apple/iCloud → system.
-- **IPv6 (G18):** default to `ipv6=false` in Shadowrocket after an isolated WeChat/TUN stall;
-  users with a verified stable carrier/router IPv6 path may opt back in.
+- **IPv6 (G18):** Clash standalone and Global Script force both kernel and DNS IPv6 off after
+  observed macOS TUN direct-path timeouts. Shadowrocket remains unchanged pending its own A/B.
 
 DNS changes are **P2** and will be gated behind validation to avoid regressions.
 
@@ -287,7 +287,7 @@ empty groups, or DNS-induced resolution failures. Any one → revert the offendi
 | **Provider (remote) upstream drift** | Low | Med | Optionally pin to commit (G13); local files for critical AI vendors |
 | **Import syntax error breaks whole config** | Low | Critical | Validation before every commit (syntax, dup, refs, FINAL position); import test each milestone |
 | **Group count creep >10** | Low | Low (maintainability) | Hard cap enforced in validation; AI-extra shares Proxy until justified |
-| **IPv6 instability for AI/WeChat TUN** | Low-Med | Med | Shadowrocket defaults to `ipv6=false`; opt-in re-enable is reversible |
+| **IPv6 instability for AI/WeChat TUN** | Low-Med | Med | Clash standalone + Global Script use `ipv6=false`; Shadowrocket remains an A/B option |
 
 **Residual risk after mitigations:** **Low–Moderate**, concentrated in (a) region-regex accuracy
 against real node names and (b) Anthropic/OpenAI domain completeness — both empirical and

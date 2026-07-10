@@ -12,6 +12,11 @@
 // ============================================================================
 function main(config) {
   // ===== AI-Ultimate-Network BEGIN =====
+  // Base subscriptions may enable IPv6 even though the standalone profile does not.
+  // Disable both kernel IPv6 handling and AAAA answers to avoid TUN direct-path stalls.
+  config["ipv6"] = false;
+  config["dns"] = config["dns"] || {};
+  config["dns"]["ipv6"] = false;
   var mk = function (name, filter) {
     return { name: name, type: "select", "include-all": true, filter: filter, proxies: ["Proxy"] };
   };

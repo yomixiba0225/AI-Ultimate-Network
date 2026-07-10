@@ -160,9 +160,9 @@ AI-Ultimate-Network/
   commit; see [`docs/DESIGN.md`](docs/DESIGN.md) §10.
 - 🔒 Your airport URLs and node lists are **never** committed (see `.gitignore`).
 
-> `ipv6=false` is the Shadowrocket default because unstable IPv6 paths can leave WeChat stuck at
-> “获取消息中” under TUN. Re-enable it only after validating your carrier/router path. `dns over
-> proxy` for AI domains remains an **optional** P2 tweak in the template.
+> The Clash Verge Global Script and standalone profile enforce `ipv6=false`; this avoids TUN
+> stalls on unstable IPv6 paths. For Shadowrocket, `dns over proxy` and `ipv6=false` remain
+> optional P2 tweaks to enable only after validating against your own network and nodes.
 
 ---
 

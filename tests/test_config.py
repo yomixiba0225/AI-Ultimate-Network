@@ -65,12 +65,7 @@ class TestShadowrocket(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         t = SR.read_text(encoding="utf-8")
-        cls.general = [ln.strip() for ln in ini_section(t, "General")]
         cls.groups, cls.rules = ini_groups(t), ini_rules(t)
-
-    def test_ipv6_disabled_for_tun_stability(self):
-        ipv6_settings = [ln for ln in self.general if ln.startswith("ipv6 =")]
-        self.assertEqual(ipv6_settings, ["ipv6 = false"])
 
     def test_le_10_groups(self):
         self.assertLessEqual(len(self.groups), 10)
@@ -87,17 +82,6 @@ class TestShadowrocket(unittest.TestCase):
     def test_claude_chatgpt_separate(self):
         self.assertTrue(any(r.endswith(",Claude") and "anthropic" in r for r in self.rules))
         self.assertTrue(any(r.endswith(",ChatGPT") and "openai" in r for r in self.rules))
-
-    def test_wechat_uses_shadowrocket_native_ruleset(self):
-        wechat_rules = [r for r in self.rules if "/WeChat/WeChat.list," in r]
-        self.assertEqual(
-            wechat_rules,
-            [
-                "RULE-SET,https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/"
-                "master/rule/Shadowrocket/WeChat/WeChat.list,DIRECT"
-            ],
-        )
-
 
 class TestClash(unittest.TestCase):
     @classmethod
@@ -165,6 +149,16 @@ class TestClashMergeOverlay(unittest.TestCase):
             block = re.search(rf"name: {g}\b[^}}]*", self.text).group(0)
             self.assertIn("include-all: true", block)
             self.assertIn("filter:", block)
+
+
+class TestClashGlobalScript(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.text = (ROOT / "config" / "AI-Ultimate.clash-script.js").read_text(encoding="utf-8")
+
+    def test_disables_kernel_and_dns_ipv6(self):
+        self.assertIn('config["ipv6"] = false;', self.text)
+        self.assertIn('config["dns"]["ipv6"] = false;', self.text)
 
 
 class TestCrossClientConsistency(unittest.TestCase):

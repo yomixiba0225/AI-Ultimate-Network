@@ -7,10 +7,10 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ### Fixed
-- **Shadowrocket TUN: WeChat could stall at “获取消息中”.** Shadowrocket now defaults to
-  `ipv6=false`, avoiding unstable carrier/router IPv6 paths while keeping WeChat `DIRECT`.
-- Replaced the accepted-but-cross-client Quantumult X WeChat source with the native Shadowrocket
-  rule-set so the provider syntax matches the consuming client.
+- **Clash Verge Global Script: WeChat could stall at “获取消息中” under TUN.** The standalone
+  Clash profile disabled IPv6, but the Global Script left the active subscription's
+  `ipv6: true` and `dns.ipv6: true` untouched. The script now forces both values to `false`,
+  preventing repeated direct IPv6 timeouts while retaining the existing WeChat `DIRECT` rules.
 
 ## [0.3.0] - 2026-07-08
 
